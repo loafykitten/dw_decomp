@@ -3001,6 +3001,9 @@ void updateNamingPreview(void)
 		strcpy(out, NAMING_PROMPT_DIGIMON);
 #if !VERSION_IS(US)
 		len = strlen(NAMING_PROMPT_DIGIMON);
+#elif defined(DW1_NATIVE)
+		/* The PS1 code adds 1 to the address as an integer; natively that truncates it. */
+		len = strlen((char *)MAIN_D_801345F4 + 1);
 #else
 		len = strlen((int32_t)MAIN_D_801345F4 + 1);
 #endif
