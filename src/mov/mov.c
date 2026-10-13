@@ -207,7 +207,14 @@ u_long *MOV_readFrame(MovieEnv *env, MovieEntry *movie)
 int32_t MOV_playMovie(int32_t movieId)
 {
 	DISPENV disp;
+#ifdef DW1_NATIVE
+	/* PutDrawEnv(&draw) below reads this uninitialised: the PS1 passes it whatever the stack
+	 * held (only a clip and offset the movie never uses), natively that can be a texture window
+	 * or a background fill. Zero is a harmless environment. */
+	DRAWENV draw = { 0 };
+#else
 	DRAWENV draw;
+#endif
 	int32_t dispFrame;
 	CdlFILE file;
 	CdlLOC loc;
