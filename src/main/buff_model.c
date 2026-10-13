@@ -57,7 +57,7 @@ void morphBuffModel(intptr_t model, int32_t compIdx, int32_t color)
 	obj = (struct TMD_STRUCT *)model;
 	obj += compIdx;
 	count = obj->primn;
-	p = (char *)obj->primtop;
+	p = (char *)DW1_TMD_ADDR(obj->primtop);
 	for (i = 0; i < count; i++) {
 		attr = *(int32_t *)p >> 24;
 		if (attr & 4) {

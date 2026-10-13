@@ -33,4 +33,12 @@ typedef unsigned int uintptr_t;
 #define DW1_PS1_ADDR(type, addr) ((type)(addr))
 #endif
 
+/*
+ * An address field of a TMD object record (vertop, nortop, primtop) after GsMapModelingData.
+ * The native build stores these as 32-bit encoded pointers and defines this to decode them.
+ */
+#ifndef DW1_TMD_ADDR
+#define DW1_TMD_ADDR(field) (field)
+#endif
+
 #endif

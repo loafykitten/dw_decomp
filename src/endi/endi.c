@@ -135,7 +135,7 @@ static void ENDI_setModelSemiTrans(Entity *entity, int32_t arg1)
 	for (i = 0; i < nobj; i++) {
 		object = &obj[i];
 		primn = object->primn;
-		prim = (uint8_t *)object->primtop;
+		prim = (uint8_t *)DW1_TMD_ADDR(object->primtop);
 		for (j = 0; j < primn; j++) {
 			p = (TMD_P_TG3 *)prim;
 			switch (p->cd) {

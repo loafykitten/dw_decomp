@@ -1785,7 +1785,7 @@ int16_t VS_offsetEFEPrimitiveUVs(char *base, int32_t idx, int8_t du, int8_t dv)
 	obj = (struct TMD_STRUCT *)base;
 	obj += idx;
 	n = obj->primn;
-	p = (char *)obj->primtop;
+	p = (char *)DW1_TMD_ADDR(obj->primtop);
 	for (i = 0; i < n; i++) {
 		code = (*(int32_t *)p >> 24) & 0xff;
 		if (code & 1) {
@@ -4111,7 +4111,7 @@ void VS_setEFEModelObjectColor(void)
 	obj = EFE_DATA_ITERATOR->model->modelPtr->obj;
 	obj += idx;
 	count = obj->primn;
-	prim = (TMD_P_TNF4 *)obj->primtop;
+	prim = (TMD_P_TNF4 *)DW1_TMD_ADDR(obj->primtop);
 	for (i = 0; i < count; i++) {
 		t = *(int32_t *)prim >> 24;
 		switch (t) {
@@ -5615,7 +5615,7 @@ void VS_setTMDObjectColor(int32_t idx, VECTOR *color, int32_t base)
 	obj = (struct TMD_STRUCT *)((uint32_t)base + 0xc);
 	obj += idx;
 	count = obj->primn;
-	prim = (TMD_P_TNF4 *)obj->primtop;
+	prim = (TMD_P_TNF4 *)DW1_TMD_ADDR(obj->primtop);
 	for (i = 0; i < count; i++) {
 		t = *(int32_t *)prim >> 24;
 		switch (t) {

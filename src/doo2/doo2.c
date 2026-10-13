@@ -433,9 +433,9 @@ void DOO2_renderWireframeModel(GsDOBJ2 *obj, int32_t wireThreshold)
 	color = WIREFRAME_COLOR_MIN + (rand() % (WIREFRAME_COLOR_MAX - WIREFRAME_COLOR_MIN));
 
 	tmd = (struct TMD_STRUCT *)obj->tmd;
-	verts = (SVECTOR *)tmd->vertop;
-	normals = (SVECTOR *)tmd->nortop;
-	tmdPrim = (uint8_t *)tmd->primtop;
+	verts = (SVECTOR *)DW1_TMD_ADDR(tmd->vertop);
+	normals = (SVECTOR *)DW1_TMD_ADDR(tmd->nortop);
+	tmdPrim = (uint8_t *)DW1_TMD_ADDR(tmd->primtop);
 	primCount = tmd->primn;
 
 	packet = GsGetWorkBase();

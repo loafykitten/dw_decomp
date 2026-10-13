@@ -175,7 +175,7 @@ void updateTMDTextureData(int32_t *tmd, int32_t clutX, int32_t x, int32_t y, int
 	clutXs = clutX << 16;
 	for (i = 0; i < nObj; obj++, i++) {
 		primn = obj->primn;
-		prim = (uint32_t *)obj->primtop;
+		prim = (uint32_t *)DW1_TMD_ADDR(obj->primtop);
 		for (j = 0; j < primn; j++) {
 			mode = prim[0] >> 24;
 			if ((mode & 4) == 0) {

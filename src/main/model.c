@@ -3025,9 +3025,9 @@ void renderWireframed(GsDOBJ2 *obj, int32_t wireFrameShare)
 
 	color = WIREFRAME_COLOR_MIN + rand() % (WIREFRAME_COLOR_MAX - WIREFRAME_COLOR_MIN);
 	tmd = (struct TMD_STRUCT *)obj->tmd;
-	vert = (SVECTOR *)tmd->vertop;
-	normal = (SVECTOR *)tmd->nortop;
-	prim = (u_char *)tmd->primtop;
+	vert = (SVECTOR *)DW1_TMD_ADDR(tmd->vertop);
+	normal = (SVECTOR *)DW1_TMD_ADDR(tmd->nortop);
+	prim = (u_char *)DW1_TMD_ADDR(tmd->primtop);
 	primn = tmd->primn;
 	pk = (u_char *)GsGetWorkBase();
 	col.r = col.g = col.b = 0x80;
@@ -3155,9 +3155,9 @@ void renderWireframed(GsDOBJ2 *obj, int32_t wireFrameShare)
 	min = WIREFRAME_COLOR_MIN;
 	color = min + rand() % (WIREFRAME_COLOR_MAX - min);
 	tmd = (struct TMD_STRUCT *)obj->tmd;
-	vert = (SVECTOR *)tmd->vertop;
-	normal = (SVECTOR *)tmd->nortop;
-	prim = (u_char *)tmd->primtop;
+	vert = (SVECTOR *)DW1_TMD_ADDR(tmd->vertop);
+	normal = (SVECTOR *)DW1_TMD_ADDR(tmd->nortop);
+	prim = (u_char *)DW1_TMD_ADDR(tmd->primtop);
 	primn = tmd->primn;
 	pk = (u_char *)GsGetWorkBase();
 	col.r = col.g = col.b = 0x80;

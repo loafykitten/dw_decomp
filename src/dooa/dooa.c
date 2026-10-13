@@ -1592,7 +1592,7 @@ void DOOA_spawnBoneShards(DooaShardEffect *effect, int32_t boneIndex, long wireI
 
 	obj = &objects[objIndex];
 	vertOut = (intptr_t)GsGetWorkBase();
-	src = (SVECTOR *)obj->vertop;
+	src = (SVECTOR *)DW1_TMD_ADDR(obj->vertop);
 	calculateBoneMatrix(entity, boneIndex, &boneMatrix);
 	verts = (DooaShardVertex *)vertOut;
 	for (i = 0; i < obj->vern; i++) {
@@ -1603,7 +1603,7 @@ void DOOA_spawnBoneShards(DooaShardEffect *effect, int32_t boneIndex, long wireI
 		vertOut += sizeof(DooaShardVertex);
 	}
 
-	prim = (intptr_t)obj->primtop;
+	prim = (intptr_t)DW1_TMD_ADDR(obj->primtop);
 	for (j = 0; j < obj->primn; j++) {
 		if (((uintptr_t)frags + sizeof(DooaShardQuad) + sizeof(TMD_P_TG4 *)) >= ((intptr_t)effect->shardBuffer + effect->shardBytes)) {
 			break;

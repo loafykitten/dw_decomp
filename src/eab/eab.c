@@ -169,7 +169,7 @@ void EAB_setModelColor(VECTOR *color)
 	obj = (struct TMD_STRUCT *)(BOSS_EFE_TMD + 0xc);
 	obj += idx;
 	count = obj->primn;
-	prim = (TMD_P_TNF4 *)obj->primtop;
+	prim = (TMD_P_TNF4 *)DW1_TMD_ADDR(obj->primtop);
 	for (i = 0; i < count; i++) {
 		t = *(int32_t *)prim >> 24;
 		switch (t) {

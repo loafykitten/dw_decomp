@@ -1046,7 +1046,7 @@ int32_t EVL_buildShardSet(Entity *entity, int32_t objIndex, int32_t bone)
 
 	calculateBoneMatrix(entity, bone, &m1);
 	outStart = out;
-	src = (SVECTOR *)obj->vertop;
+	src = (SVECTOR *)DW1_TMD_ADDR(obj->vertop);
 	calculateBoneMatrix(entity, bone, &m2);
 	for (i = 0; (uint32_t)i < obj->vern; i++) {
 		ApplyMatrixSV(&m2, src++, &tmp);
@@ -1063,19 +1063,19 @@ int32_t EVL_buildShardSet(Entity *entity, int32_t objIndex, int32_t bone)
 	entry->model = (int32_t *)entity;
 	entry->bone = bone;
 	entry->vertices = outStart;
-	entry->primitives = (intptr_t)obj->primtop;
+	entry->primitives = (intptr_t)DW1_TMD_ADDR(obj->primtop);
 	entry->centerCount = obj->primn;
 	addObject(0x604, slot, EVL_tickShardSet, EVL_renderShardSet);
 
-	prim = (intptr_t)obj->primtop;
+	prim = (intptr_t)DW1_TMD_ADDR(obj->primtop);
 	for (j = 0; (uint32_t)j < obj->primn; j++) {
 		switch (((int8_t *)prim)[3]) {
 		case 0x34:
 		case 0x36:
 			tri = prim;
-			va = &((SVECTOR *)obj->nortop)[((TMD_P_TG3 *)tri)->n0];
-			vb = &((SVECTOR *)obj->nortop)[((TMD_P_TG3 *)tri)->n1];
-			vc = &((SVECTOR *)obj->nortop)[((TMD_P_TG3 *)tri)->n2];
+			va = &((SVECTOR *)DW1_TMD_ADDR(obj->nortop))[((TMD_P_TG3 *)tri)->n0];
+			vb = &((SVECTOR *)DW1_TMD_ADDR(obj->nortop))[((TMD_P_TG3 *)tri)->n1];
+			vc = &((SVECTOR *)DW1_TMD_ADDR(obj->nortop))[((TMD_P_TG3 *)tri)->n2];
 			ApplyMatrixSV(&m1, va, &p0);
 			ApplyMatrixSV(&m1, vb, &p1);
 			ApplyMatrixSV(&m1, vc, &p2);
@@ -1091,10 +1091,10 @@ int32_t EVL_buildShardSet(Entity *entity, int32_t objIndex, int32_t bone)
 		case 0x3c:
 		case 0x3e:
 			quad = prim;
-			va = &((SVECTOR *)obj->nortop)[((TMD_P_TG4 *)quad)->n0];
-			vb = &((SVECTOR *)obj->nortop)[((TMD_P_TG4 *)quad)->n1];
-			vc = &((SVECTOR *)obj->nortop)[((TMD_P_TG4 *)quad)->n2];
-			vd = &((SVECTOR *)obj->nortop)[((TMD_P_TG4 *)quad)->n3];
+			va = &((SVECTOR *)DW1_TMD_ADDR(obj->nortop))[((TMD_P_TG4 *)quad)->n0];
+			vb = &((SVECTOR *)DW1_TMD_ADDR(obj->nortop))[((TMD_P_TG4 *)quad)->n1];
+			vc = &((SVECTOR *)DW1_TMD_ADDR(obj->nortop))[((TMD_P_TG4 *)quad)->n2];
+			vd = &((SVECTOR *)DW1_TMD_ADDR(obj->nortop))[((TMD_P_TG4 *)quad)->n3];
 			ApplyMatrixSV(&m1, va, &p0);
 			ApplyMatrixSV(&m1, vb, &p1);
 			ApplyMatrixSV(&m1, vc, &p2);

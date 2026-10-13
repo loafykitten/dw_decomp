@@ -1118,7 +1118,7 @@ void STD_offsetTMDObjectUVs(uint32_t *tmd, int32_t vofs, int32_t nofs, int32_t o
 	obj = (struct TMD_STRUCT *)tmd;
 	delta = (nofs << 8) + vofs;
 	n = obj[objIdx].primn;
-	p = (uint32_t *)obj[objIdx].primtop;
+	p = (uint32_t *)DW1_TMD_ADDR(obj[objIdx].primtop);
 	for (i = 0; i < n; i++) {
 		code = *p >> 24;
 		if (!(code & 4)) {
