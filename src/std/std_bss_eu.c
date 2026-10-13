@@ -134,18 +134,18 @@ GsOT_TAG STD_MODEL_SCENE_OT_TAGS_1[32] = {
 };
 
 GsDOBJ2 STD_ARENA_OBJECTS[4] = {
-	{ 0x87a20044, NULL, (long unsigned int *)0xafa20010, 0x24020008 },
+	{ 0x87a20044, NULL, (unsigned long *)0xafa20010, 0x24020008 },
 	{ 0xafa20014, (GsCOORDINATE2 *)0x87a2004c, NULL, 0x20420049 },
 	{
 		0x00023400,
 		(GsCOORDINATE2 *)0x00063403,
-		(long unsigned int *)0x87a2004e,
+		(unsigned long *)0x87a2004e,
 		0x00000000,
 	},
 	{
 		0x2042fffd,
 		(GsCOORDINATE2 *)0x00023c00,
-		(long unsigned int *)0x00073c03,
+		(unsigned long *)0x00073c03,
 		0x00002021,
 	},
 };

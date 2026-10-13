@@ -237,25 +237,25 @@ GsDOBJ2 VS_ARENA_OBJECTS[4] = {
 	{
 		0x00000004,
 		(GsCOORDINATE2 *)0x001f0700,
-		(long unsigned int *)0x000d0000,
+		(unsigned long *)0x000d0000,
 		0xbcd50012,
 	},
 	{
 		0x00380002,
 		(GsCOORDINATE2 *)0x55007976,
-		(long unsigned int *)0x23000a00,
+		(unsigned long *)0x23000a00,
 		0x04000600,
 	},
 	{
 		0x00000004,
 		(GsCOORDINATE2 *)0x00001f07,
-		(long unsigned int *)0x12000d00,
+		(unsigned long *)0x12000d00,
 		0x02bcf400,
 	},
 	{
 		0x76003800,
 		(GsCOORDINATE2 *)0x0055007a,
-		(long unsigned int *)0x0023000a,
+		(unsigned long *)0x0023000a,
 		0x08040006,
 	},
 };

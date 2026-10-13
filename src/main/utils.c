@@ -267,7 +267,12 @@ void convertValueToDigits(int32_t n, int32_t value, int32_t *outCount,
 	char buf[8];
 	int32_t i;
 	int32_t j;
+#ifdef DW1_NATIVE
+	/* The native build makes `long` 32-bit (dw1_native.h), so `long long` can't be spelled. */
+	int64_t nv;
+#else
 	long long nv;
+#endif
 	int32_t off;
 	char *base;
 	int32_t cnt;
