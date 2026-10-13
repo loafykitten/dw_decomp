@@ -25,4 +25,12 @@ typedef unsigned int uintptr_t;
 
 #endif
 
+/*
+ * A fixed PS1 RAM address, as a pointer of the given type. The native build (dw1-silicon)
+ * defines this first, to point into its stand-in for PS1 RAM; everywhere else it's a cast.
+ */
+#ifndef DW1_PS1_ADDR
+#define DW1_PS1_ADDR(type, addr) ((type)(addr))
+#endif
+
 #endif

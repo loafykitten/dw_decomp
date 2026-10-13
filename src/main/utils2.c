@@ -21,7 +21,7 @@
 #include <dw/version.h>
 #include <text/main/utils2.h>
 
-#define shop_START		((char *)0x80080800)
+#define shop_START		DW1_PS1_ADDR(char *, 0x80080800)
 
 void reinitializeAfterTournament(void);
 void thunkReinitializeAfterTournament(void);
@@ -69,6 +69,25 @@ int32_t STD_tournamentMain(uint8_t *arg);
 extern uint8_t ITEM_CLUT_DATA[];
 extern uint8_t MAP_LAYER_ENABLED;
 extern RGB8 TEXT_COLORS[];
+#ifdef DW1_NATIVE
+/* Overlay load addresses from config/us/overlay.ld; the native build links every overlay's
+ * code and loads only its file image, at the same place in its stand-in for PS1 RAM. */
+#define btl_START	DW1_PS1_ADDR(char *, 0x80052AE0)
+#define dget_START	DW1_PS1_ADDR(char *, 0x80080800)
+#define doo2_START	DW1_PS1_ADDR(char *, 0x80070000)
+#define dooa_START	DW1_PS1_ADDR(char *, 0x80080000)
+#define eab_START	DW1_PS1_ADDR(char *, 0x80060000)
+#define endi_START	DW1_PS1_ADDR(char *, 0x80060000)
+#define evl_START	DW1_PS1_ADDR(char *, 0x80060000)
+#define fish_START	DW1_PS1_ADDR(char *, 0x80070000)
+#define kar_START	DW1_PS1_ADDR(char *, 0x80053800)
+#define mov_START	DW1_PS1_ADDR(char *, 0x80010000)
+#define murd_START	DW1_PS1_ADDR(char *, 0x8007C000)
+#define std_START	DW1_PS1_ADDR(char *, 0x80052AE0)
+#define trn_START	DW1_PS1_ADDR(char *, 0x80088800)
+#define trn2_START	DW1_PS1_ADDR(char *, 0x80088800)
+#define vs_START	DW1_PS1_ADDR(char *, 0x80052AE0)
+#else
 extern char btl_START[];
 extern char dget_START[];
 extern char doo2_START[];
@@ -84,6 +103,7 @@ extern char std_START[];
 extern char trn_START[];
 extern char trn2_START[];
 extern char vs_START[];
+#endif
 
 // clang-format off
 void *REL_BIN_OFFSETS[16] = {

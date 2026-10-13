@@ -11,11 +11,11 @@
 #include <dw/types.h>
 #include <dw/version.h>
 
-#define VS_FINISHER_TIM	((char *)0x80052ae0)
-#define VS_FINISHER_MODEL	((char *)0x80053800)
-#define VS_CONFUSION_MODEL	((char *)0x80054838)
-#define VS_STUN_MODEL		((char *)0x80054d00)
-#define VS_BUFF_MODEL		((TMDModel *)0x80055328)
+#define VS_FINISHER_TIM	DW1_PS1_ADDR(char *, 0x80052ae0)
+#define VS_FINISHER_MODEL	DW1_PS1_ADDR(char *, 0x80053800)
+#define VS_CONFUSION_MODEL	DW1_PS1_ADDR(char *, 0x80054838)
+#define VS_STUN_MODEL		DW1_PS1_ADDR(char *, 0x80054d00)
+#define VS_BUFF_MODEL		DW1_PS1_ADDR(TMDModel *, 0x80055328)
 
 typedef struct {
 	int16_t hp;
