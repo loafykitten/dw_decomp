@@ -960,7 +960,7 @@ void tickScriptDialogueBox(void)
 		if (tickSelectionDialogue() != 0xffff) {
 			SCRIPT_POINTER = DIALOGUE_SELECTION.pointer + DIALOGUE_SELECTION.current * 2;
 			SCRIPT_POINTER =
-				(uint8_t *)((uint32_t)ACTIVE_SCRIPT +
+				(uint8_t *)((uintptr_t)ACTIVE_SCRIPT +
 			                    *(uint16_t *)SCRIPT_POINTER);
 		}
 	} else if (ACTIVE_INSTRUCTION == SCRIPT_OP_SHOW_TEXTBOX) {

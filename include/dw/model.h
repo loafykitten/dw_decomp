@@ -38,7 +38,7 @@ ModelComponent *getEntityModelComponent(int32_t instance, int32_t type);
 int32_t getEntityType(Entity *entity);
 void initializeDigimonObject(int32_t type, int32_t instanceId, void (*tick)(int32_t));
 void initializeModelComponents(void);
-int32_t loadMMDAsync(int32_t digimonType, int32_t entityType, int32_t buffer, EvoModelData *modelData,
+int32_t loadMMDAsync(int32_t digimonType, int32_t entityType, intptr_t buffer, EvoModelData *modelData,
                      uint8_t *readComplete);
 void removeEntity(int32_t objectId, int32_t entityId);
 void resetFlattenGlobal(void);

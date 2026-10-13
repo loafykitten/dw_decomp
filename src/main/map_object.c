@@ -298,7 +298,7 @@ void loadStaticTMD(char *path, char *buffer, GsDOBJ2 *obj,
 	readFile(path, buffer);
 
 	GsMapModelingData((unsigned long *)(&buffer[4]));
-	GsLinkObject4((unsigned long)&buffer[12], obj, 0);
+	GsLinkObject4((uintptr_t)&buffer[12], obj, 0);
 
 	GsInitCoordinate2(NULL, coord);
 
@@ -456,7 +456,7 @@ void initializeChest(void)
 	GsInitCoordinate2(&CHEST_COORDS[0], &CHEST_COORDS[1]);
 
 	for (i = 0; i < 2; ++i) {
-		GsLinkObject4((unsigned long)&buf[12], &CHEST_OBJECTS[i], i);
+		GsLinkObject4((uintptr_t)&buf[12], &CHEST_OBJECTS[i], i);
 		CHEST_OBJECTS[i].attribute = 0;
 		CHEST_OBJECTS[i].coord2 = &CHEST_COORDS[i];
 	}
@@ -513,7 +513,7 @@ void loadWarpCrystals(int16_t mapId)
 	GsInitCoordinate2(&WARP_CRYSTAL_COORDS[0], &WARP_CRYSTAL_COORDS[1]);
 
 	for (i = 0; i < 2; i++) {
-		GsLinkObject4((unsigned long)&buf[12],
+		GsLinkObject4((uintptr_t)&buf[12],
 			      &WARP_CRYSTAL_OBJECTS[i], i);
 		WARP_CRYSTAL_OBJECTS[i].attribute = 0;
 		WARP_CRYSTAL_OBJECTS[i].coord2 = &WARP_CRYSTAL_COORDS[i];
@@ -684,12 +684,12 @@ void spawnToyTownBoxes(void)
 
 	i = 0;
 	while (i < 2) {
-		GsLinkObject4((unsigned long)(bigMeshData + 3),
+		GsLinkObject4((uintptr_t)(bigMeshData + 3),
 			      &WARP_CRYSTAL_OBJECTS[i], i);
 		WARP_CRYSTAL_OBJECTS[i].attribute = 0;
 		WARP_CRYSTAL_OBJECTS[i].coord2 = &WARP_CRYSTAL_COORDS[i];
 
-		GsLinkObject4((unsigned long)(smallMeshData + 3),
+		GsLinkObject4((uintptr_t)(smallMeshData + 3),
 			      &GENERAL_OBJECTS[i], i);
 		GENERAL_OBJECTS[i].attribute = 0;
 		GENERAL_OBJECTS[i].coord2 = &GENERAL_COORDS[i];

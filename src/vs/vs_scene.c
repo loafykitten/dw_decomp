@@ -1687,7 +1687,7 @@ void VS_loadArenaAssets(void)
 	readFile(VS_ARENA_MODELS[VS_BATTLE_SETUP.stage], VS_STAGE_MODEL_PTR);
 	GsMapModelingData((u_long *)&VS_STAGE_MODEL_PTR->flags);
 	for (i = 0; i < VS_ARENA_MODEL_COUNTS[VS_BATTLE_SETUP.stage]; i++) {
-		GsLinkObject4((u_long)VS_STAGE_MODEL_PTR->obj, &VS_ARENA_OBJECTS[i], i);
+		GsLinkObject4((uintptr_t)VS_STAGE_MODEL_PTR->obj, &VS_ARENA_OBJECTS[i], i);
 		GsInitCoordinate2(NULL, &VS_ARENA_COORDS[i].coord);
 		VS_ARENA_OBJECTS[i].attribute = 0;
 		VS_ARENA_OBJECTS[i].coord2 = &VS_ARENA_COORDS[i].coord;

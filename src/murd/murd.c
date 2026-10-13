@@ -790,7 +790,7 @@ int32_t MURD_tick(partner, isInitialized)
 	}
 
 	MURD_initializeOrderingTables();
-	MURD_storeDigimonTexture((u_long)MURD_TEXTURE_BUFFER, (Entity *)partner);
+	MURD_storeDigimonTexture((uintptr_t)MURD_TEXTURE_BUFFER, (Entity *)partner);
 
 	return 0;
 }

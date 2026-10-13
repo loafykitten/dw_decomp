@@ -571,7 +571,7 @@ void setInt16WithStride(int16_t *dest, int16_t value, int16_t count,
 
 	for (i = 0; i < count; i++) {
 		*dest = value;
-		dest = (int16_t *)((int32_t)dest + stride);
+		dest = (int16_t *)((intptr_t)dest + stride);
 	}
 }
 
@@ -589,7 +589,7 @@ void renderTMDModel(buffer, id, coord, super, trans, rot, scale)
 	GsDOBJ2 obj;
 	MATRIX m;
 
-	GsLinkObject4((unsigned long)&buffer[12], &obj, id);
+	GsLinkObject4((uintptr_t)&buffer[12], &obj, id);
 	GsInitCoordinate2(super, coord);
 
 	obj.attribute = 0;
@@ -661,12 +661,12 @@ int32_t processSomeArenaArrays(int32_t count, int32_t t, int32_t *keys,
 			   (dt * (slopes[lo + 1] - slopes[lo])) / dx));
 #else
 	off = lo * 4;
-	key = (int32_t *)(off + (uint32_t)keys);
+	key = (int32_t *)(off + (uintptr_t)keys);
 	x0 = key[0];
 	dx = key[1] - key[0];
 	dt = t - x0;
-	value = (int32_t *)((uint32_t)values + off);
-	slope = (int32_t *)((uint32_t)slopes + off);
+	value = (int32_t *)((uintptr_t)values + off);
+	slope = (int32_t *)((uintptr_t)slopes + off);
 	lo = value[0];
 	m0 = slope[0];
 	m1 = slope[1];

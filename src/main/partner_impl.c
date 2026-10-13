@@ -438,7 +438,7 @@ void initializePoop(void)
 	readFile(MAIN_D_801225AC, buf);
 
 	GsMapModelingData((unsigned long *)&buf[4]);
-	GsLinkObject4((unsigned long)&buf[0xc], &POOP_OBJECT, 0);
+	GsLinkObject4((uintptr_t)&buf[0xc], &POOP_OBJECT, 0);
 
 	GsInitCoordinate2(NULL, &POOP_POSITION);
 	POOP_OBJECT.attribute = 0;

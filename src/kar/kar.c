@@ -730,7 +730,7 @@ void KAR_setupMatch(int32_t mode)
 					stone->type = 3;
 				}
 			}
-			GsLinkObject4((u_long)(MAIN_D_80135240 + 3), &stone->obj, stone->type * 3 + models.id[p]);
+			GsLinkObject4((uintptr_t)(MAIN_D_80135240 + 3), &stone->obj, stone->type * 3 + models.id[p]);
 			GsInitCoordinate2(NULL, &stone->coord);
 			stone->obj.attribute = 0;
 			stone->obj.coord2 = &stone->coord;
@@ -847,7 +847,7 @@ void KAR_tickStones(int32_t instanceId)
 				if (stone->state == 1 && move <= 0 && stone->type == 3) {
 					models = MAIN_D_80134A4C;
 					stone->state = 2;
-					GsLinkObject4((u_long)(MAIN_D_80135240 + 3), &stone->obj, models.id[p]);
+					GsLinkObject4((uintptr_t)(MAIN_D_80135240 + 3), &stone->obj, models.id[p]);
 					playSound2(8, 4);
 				}
 			}
@@ -1958,7 +1958,7 @@ void KAR_beginAiming(void)
 	KAR_D_8005B5A0[MAIN_D_8013523C].row.stones[MAIN_D_8013523A].state = 0;
 	if (KAR_D_8005B5A0[MAIN_D_8013523C].row.stones[MAIN_D_8013523A].type == 3) {
 		n = (MAIN_D_8013523C != 0) ? 1 : 2;
-		GsLinkObject4((u_long)(MAIN_D_80135240 + 3), &KAR_D_8005B5A0[MAIN_D_8013523C].row.stones[MAIN_D_8013523A].obj, n);
+		GsLinkObject4((uintptr_t)(MAIN_D_80135240 + 3), &KAR_D_8005B5A0[MAIN_D_8013523C].row.stones[MAIN_D_8013523A].obj, n);
 	}
 
 	MAIN_D_8013524C = -0x400;

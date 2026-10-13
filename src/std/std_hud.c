@@ -1113,7 +1113,7 @@ void STD_offsetTMDObjectUVs(uint32_t *tmd, int32_t vofs, int32_t nofs, int32_t o
 	uint32_t len;
 	uint8_t code;
 
-	tmd = (uint32_t *)((int32_t)tmd + 8);
+	tmd = (uint32_t *)((intptr_t)tmd + 8);
 	nobj = *tmd++;
 	obj = (struct TMD_STRUCT *)tmd;
 	delta = (nofs << 8) + vofs;
@@ -1145,7 +1145,7 @@ void STD_loadVersusSceneModel(void)
 	GsMapModelingData((u_long *)(STD_DRAW_TMD + 4));
 
 	for (i = 0; i < 4; i++) {
-		GsLinkObject4((u_long)(STD_DRAW_TMD + 0xc), &STD_VERSUS_MODEL_OBJECTS[i].data.obj, i);
+		GsLinkObject4((uintptr_t)(STD_DRAW_TMD + 0xc), &STD_VERSUS_MODEL_OBJECTS[i].data.obj, i);
 		GsInitCoordinate2(NULL, &STD_VERSUS_MODEL_OBJECTS[i].data.posMatrix);
 		STD_VERSUS_MODEL_OBJECTS[i].data.obj.attribute = 0;
 		STD_VERSUS_MODEL_OBJECTS[i].data.obj.coord2 = &STD_VERSUS_MODEL_OBJECTS[i].data.posMatrix;
@@ -1250,7 +1250,7 @@ void STD_loadWinLoseModel(void)
 	readFile(STD_PATH_STDDAT_WIN_LOSE_TMD, buf);
 	GsMapModelingData((u_long *)(buf + 4));
 	for (i = 0; i < 8; i++) {
-		GsLinkObject4((u_long)(buf + 0xc), &STD_RESULT_MODEL_OBJECTS[i].data.obj, i);
+		GsLinkObject4((uintptr_t)(buf + 0xc), &STD_RESULT_MODEL_OBJECTS[i].data.obj, i);
 		GsInitCoordinate2(NULL, &STD_RESULT_MODEL_OBJECTS[i].data.posMatrix);
 		STD_RESULT_MODEL_OBJECTS[i].data.obj.attribute = 0;
 		STD_RESULT_MODEL_OBJECTS[i].data.obj.coord2 = &STD_RESULT_MODEL_OBJECTS[i].data.posMatrix;
@@ -1302,7 +1302,7 @@ void STD_loadChampionModels(void)
 	}
 
 	for (i = 0; i < 9; i++) {
-		GsLinkObject4((u_long)(buf + 0xc), &STD_VERSUS_MODEL_OBJECTS[i].data.obj, i);
+		GsLinkObject4((uintptr_t)(buf + 0xc), &STD_VERSUS_MODEL_OBJECTS[i].data.obj, i);
 		GsInitCoordinate2(NULL, &STD_VERSUS_MODEL_OBJECTS[i].data.posMatrix);
 		STD_VERSUS_MODEL_OBJECTS[i].data.obj.attribute = 0x80000000;
 		STD_VERSUS_MODEL_OBJECTS[i].data.obj.coord2 = &STD_VERSUS_MODEL_OBJECTS[i].data.posMatrix;
@@ -1352,7 +1352,7 @@ void STD_loadChampionModels(void)
 		readFile(STD_PATH_STDDAT_T_DAI_TMD, STD_DAI_TMD);
 	}
 	GsMapModelingData((u_long *)(STD_DAI_TMD + 4));
-	GsLinkObject4((u_long)(STD_DAI_TMD + 0xc), &STD_RESULT_MODEL_OBJECTS[0].data.obj, 0);
+	GsLinkObject4((uintptr_t)(STD_DAI_TMD + 0xc), &STD_RESULT_MODEL_OBJECTS[0].data.obj, 0);
 	GsInitCoordinate2(NULL, &STD_RESULT_MODEL_OBJECTS[0].data.posMatrix);
 	STD_RESULT_MODEL_OBJECTS[0].data.obj.attribute = 0;
 	STD_RESULT_MODEL_OBJECTS[0].data.obj.coord2 = &STD_RESULT_MODEL_OBJECTS[0].data.posMatrix;

@@ -44,7 +44,7 @@ void FISH_loadTMDModel(TMDFileLoadingData *model, char *path, uint8_t *buf, uint
 
 	tmdObjects = model->targetBuffer->obj;
 	for (i = 0; i < model->objCount; i++) {
-		GsLinkObject4((u_long)tmdObjects, obj = &model->objects[i], i);
+		GsLinkObject4((uintptr_t)tmdObjects, obj = &model->objects[i], i);
 		obj->attribute = 0;
 	}
 }

@@ -676,7 +676,7 @@ int32_t DOO2_buildShardSet(VECTOR *offset, u_long modelList, int32_t modelIndex)
 			((Doo2Shard *)out)->offsetZ = 0;
 			((Doo2Shard *)out)->frame = 0;
 			out += sizeof(Doo2Shard);
-			prim = (uint8_t *)((int32_t)prim + (int32_t)sizeof(TMD_P_TG3));
+			prim = (uint8_t *)((intptr_t)prim + (int32_t)sizeof(TMD_P_TG3));
 			break;
 		case 0x3c:
 			quad = (TMD_P_TG4 *)prim;
@@ -699,7 +699,7 @@ int32_t DOO2_buildShardSet(VECTOR *offset, u_long modelList, int32_t modelIndex)
 			((Doo2Shard *)out)->offsetZ = 0;
 			((Doo2Shard *)out)->frame = 0;
 			out += sizeof(Doo2Shard);
-			prim = (uint8_t *)((int32_t)prim + (int32_t)sizeof(TMD_P_TG4));
+			prim = (uint8_t *)((intptr_t)prim + (int32_t)sizeof(TMD_P_TG4));
 			break;
 		}
 	}

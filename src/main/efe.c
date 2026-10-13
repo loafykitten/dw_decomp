@@ -117,7 +117,12 @@ uint8_t CLOUD_FX_COLOR[16] = {
 	0x80, 0x80, 0x80, 0x80, 0x79, 0x73, 0x6c, 0x66,
 	0x60, 0x59, 0x53, 0x4c, 0x46, 0x40, 0x00, 0x00,
 };
+#ifdef DW1_NATIVE
+/* Used as a C string; on the PS1 the zero padding after the array ended it. */
+char MAIN_D_8012342C[17] = "ETCHI\\EFEDAT.EFE";
+#else
 char MAIN_D_8012342C[16] = "ETCHI\\EFEDAT.EFE";
+#endif
 uint32_t EFEDAT_CD_LOCATION[4] = {0};
 
 static void *efe_data_order[] = {

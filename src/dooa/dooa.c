@@ -367,9 +367,9 @@ void DOOA_tickDissolve(int32_t instanceId)
 			tickFileReadQueue(0);
 		}
 		DOOA_initShardEffect(entity, DOOA_SHARD_BUFFER, DOOA_SHARD_BUFFER_SIZE);
-		DOOA_saveEntityClut((int32_t)DOOA_SAVED_ENTITY_CLUT, entity);
-		DOOA_saveModelClut((int32_t)DOOA_MODEL_CLUT);
-		DOOA_saveShardClut((int32_t)DOOA_SHARD_CLUT);
+		DOOA_saveEntityClut((intptr_t)DOOA_SAVED_ENTITY_CLUT, entity);
+		DOOA_saveModelClut((intptr_t)DOOA_MODEL_CLUT);
+		DOOA_saveShardClut((intptr_t)DOOA_SHARD_CLUT);
 		MAIN_D_80135348 = DRAWING_OFFSET_X;
 		MAIN_D_8013534C = DRAWING_OFFSET_Y;
 		DOOA_SAVED_VIEW = GS_VIEWPOINT;
@@ -544,10 +544,10 @@ void DOOA_tickDissolve(int32_t instanceId)
 				LoadImage(&rect, timInfo.clut);
 				MAIN_D_80135328 = GetClut(timInfo.cx, timInfo.cy);
 			}
-			DOO2_saveClutTile((u_long)DOO2_D_80071B5C, MAIN_D_80135328);
+			DOO2_saveClutTile((uintptr_t)DOO2_D_80071B5C, MAIN_D_80135328);
 			readFile(DOOA_EGG_TMD_PATH, DOO2_D_80071EE4);
 			GsMapModelingData((unsigned long *)DOO2_D_80071EE4 + 1);
-			DOO2_saveModelClut((u_long)DOO2_D_80071BE0);
+			DOO2_saveModelClut((uintptr_t)DOO2_D_80071BE0);
 		}
 		work = 0x2c4 - seq->frame;
 		DOOA_updateCutsceneCamera(&entity->posData->location, entity->posData->rotation.vy, 0x149, 0x17b, work);
@@ -1100,7 +1100,7 @@ void DOOA_tickRebirth(int32_t instanceId)
 			while (seq->isModelLoading != 0) {
 				tickFileReadQueue(0);
 			}
-			reincarnatePartner((int32_t)ENTITY_TABLE[1], &PARTNER_ENTITY.digimonEntity.stats, &PARTNER_PARA, REINCARNATE_BABY_TYPE[seq->eggSlot]);
+			reincarnatePartner((intptr_t)ENTITY_TABLE[1], &PARTNER_ENTITY.digimonEntity.stats, &PARTNER_PARA, REINCARNATE_BABY_TYPE[seq->eggSlot]);
 			waitForSoundBufferLoading(3);
 			entity = (Entity *)&PARTNER_ENTITY;
 			seq->entity = entity;
@@ -1141,7 +1141,7 @@ void DOOA_tickRebirth(int32_t instanceId)
 		if (seq->sparkleIndex < 47) {
 			offset = DOOA_SPARKLE_OFFSET;
 			if (DOOA_SPARKLE_BONE_IDS[seq->sparkleIndex] >= 0) {
-				shardSet = DOO2_buildShardSet(&offset, (u_long)DOO2_D_80071EE4,
+				shardSet = DOO2_buildShardSet(&offset, (uintptr_t)DOO2_D_80071EE4,
 				                              DOOA_SPARKLE_BONE_IDS[seq->sparkleIndex] + (seq->eggSlot * 6));
 				MAIN_D_80135364[DOOA_SPARKLE_BONE_IDS[seq->sparkleIndex]] = -1;
 				playSound(8, 7);
@@ -1180,7 +1180,7 @@ void DOOA_renderRebirth(int32_t instanceId)
 	panel = &DOOA_REINCARNATION_SEQ;
 	for (i = 0; i < 6; i++) {
 		if (MAIN_D_80135364[i] == 0) {
-			GsLinkObject4((u_long)&DOO2_D_80071EE4[3], &obj, i + (panel->eggSlot * 6));
+			GsLinkObject4((uintptr_t)&DOO2_D_80071EE4[3], &obj, i + (panel->eggSlot * 6));
 			obj.attribute = 0;
 			GsInitCoordinate2(NULL, &coord);
 			obj.coord2 = &coord;

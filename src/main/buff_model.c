@@ -6,7 +6,7 @@
 
 void tickBuffModel(int32_t instanceId);
 void renderBuffModel(void);
-void morphBuffModel(int32_t model, int32_t compIdx, int32_t color);
+void morphBuffModel(intptr_t model, int32_t compIdx, int32_t color);
 void initializeBuffModel(TMDModel *model);
 int32_t initializeBuffModelObject(void);
 int32_t removeBuffModelObject(void);
@@ -37,7 +37,7 @@ static void *buff_model_functions[] = {
 
 void tickBuffModel(int32_t instanceId)
 {
-	morphBuffModel((int32_t)BUFF_MODEL[0], 5, BUFF_MODEL_MORPH_VALUE[BUFF_MODEL_FRAME & 1]);
+	morphBuffModel((intptr_t)BUFF_MODEL[0], 5, BUFF_MODEL_MORPH_VALUE[BUFF_MODEL_FRAME & 1]);
 	BUFF_MODEL_FRAME += 1;
 }
 
@@ -45,7 +45,7 @@ void renderBuffModel(void)
 {
 }
 
-void morphBuffModel(int32_t model, int32_t compIdx, int32_t color)
+void morphBuffModel(intptr_t model, int32_t compIdx, int32_t color)
 {
 	char *p;
 	int32_t i;

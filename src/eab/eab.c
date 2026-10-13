@@ -693,15 +693,15 @@ int32_t EAB_tick(entity, isInitialized)
 	initializeFlashData((char *)EAB_D_80061800.data);
 	for (i = 0; i < 9; i++) {
 		*EFE_DATA_STACK++ = 0x20;
-		*EFE_DATA_STACK++ = (int32_t)EAB_D_8006170C[i];
+		*EFE_DATA_STACK++ = (intptr_t)EAB_D_8006170C[i];
 		*EFE_DATA_STACK++ = 0x22;
 		*EFE_DATA_STACK++ = 0x32;
 		*EFE_DATA_STACK++ = 0;
 		*EFE_DATA_STACK++ = EAB_D_8006170C[i][3];
 		colorEnd.vx = colorEnd.vy = colorEnd.vz = 0xff;
 		colorStart.vx = colorStart.vy = colorStart.vz = 0x14;
-		*EFE_DATA_STACK++ = (int32_t)&colorStart;
-		*EFE_DATA_STACK++ = (int32_t)&colorEnd;
+		*EFE_DATA_STACK++ = (intptr_t)&colorStart;
+		*EFE_DATA_STACK++ = (intptr_t)&colorEnd;
 		EFECreateFlash();
 	}
 	playSound(8, 1);

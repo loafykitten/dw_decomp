@@ -131,20 +131,20 @@ int32_t loadSoundCompleteCallback(void *param)
 	uint8_t *buffer;
 	unsigned long addr;
 
-	sb = &SOUND_BUFFERS[(int32_t)param];
+	sb = &SOUND_BUFFERS[(intptr_t)param];
 	buffer = sb->buffer;
 
 	switch (LOAD_SOUND_COMPLETE_STATE) {
 	case 0:
 		sb->vabId = 0;
-		memcpy(VHB_HEADER_ADDR[(int32_t)param],
+		memcpy(VHB_HEADER_ADDR[(intptr_t)param],
 		       &buffer[(((VhbFileHeader *)buffer)->vhOffset >> 2) << 2],
 		       ((VhbFileHeader *)buffer)->vbOffset - ((VhbFileHeader *)buffer)->vhOffset);
 
-		SsVabClose((int32_t)param);
-		if ((sb->vabId = SsVabOpenHeadSticky(VHB_HEADER_ADDR[(int32_t)param],
-						     (int32_t)param,
-						     VHB_SOUNDBUFFER_START[(int32_t)param])) < 0) {
+		SsVabClose((intptr_t)param);
+		if ((sb->vabId = SsVabOpenHeadSticky(VHB_HEADER_ADDR[(intptr_t)param],
+						     (intptr_t)param,
+						     VHB_SOUNDBUFFER_START[(intptr_t)param])) < 0) {
 			sb->vabId = -1;
 			return 0;
 		}

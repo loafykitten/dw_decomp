@@ -717,7 +717,7 @@ void scriptInstruction10to27(op)
 		entry.smth[0] = 1;
 		pushScriptStack(&entry);
 		SCRIPT_POINTER =
-			(uint8_t *)((uint32_t)ACTIVE_SCRIPT + shortArg);
+			(uint8_t *)((uintptr_t)ACTIVE_SCRIPT + shortArg);
 		break;
 	case SCRIPT_OP_JUMP_TO_FILE_AND_LINK:
 		skipOneReadTwoShort(&shortArg, &offset);
@@ -727,7 +727,7 @@ void scriptInstruction10to27(op)
 		pushScriptStack(&entry);
 		ACTIVE_SCRIPT = getScript(shortArg);
 		SCRIPT_POINTER = getScriptSection(
-			(uint8_t *)(int32_t)ACTIVE_SCRIPT, offset);
+			(uint8_t *)(intptr_t)ACTIVE_SCRIPT, offset);
 		break;
 	case SCRIPT_OP_JUMP_RETURN:
 		SCRIPT_POINTER++;
@@ -738,13 +738,13 @@ void scriptInstruction10to27(op)
 	case SCRIPT_OP_JUMP_TO:
 		skipOneReadOneUShort(&shortArg);
 		SCRIPT_POINTER =
-			(uint8_t *)((uint32_t)ACTIVE_SCRIPT + shortArg);
+			(uint8_t *)((uintptr_t)ACTIVE_SCRIPT + shortArg);
 		break;
 	case SCRIPT_OP_JUMP_TO_FILE:
 		skipOneReadTwoShort(&shortArg, &offset);
 		ACTIVE_SCRIPT = getScript(shortArg);
 		SCRIPT_POINTER = getScriptSection(
-			(uint8_t *)(int32_t)ACTIVE_SCRIPT, offset);
+			(uint8_t *)(intptr_t)ACTIVE_SCRIPT, offset);
 		break;
 	case SCRIPT_OP_SWITCH:
 		pollOneUByteOneUShort(&pstat, &shortArg);
@@ -754,7 +754,7 @@ void scriptInstruction10to27(op)
 		}
 		shortArg = *(uint16_t *)(SCRIPT_POINTER + (value << 1));
 		SCRIPT_POINTER =
-			(uint8_t *)((uint32_t)ACTIVE_SCRIPT + shortArg);
+			(uint8_t *)((uintptr_t)ACTIVE_SCRIPT + shortArg);
 		break;
 	case SCRIPT_OP_IF:
 		SCRIPT_POINTER++;
@@ -943,7 +943,7 @@ void scriptIfInstruction(void)
 				continue;
 			}
 			SCRIPT_POINTER =
-				(uint8_t *)((uint32_t)ACTIVE_SCRIPT +
+				(uint8_t *)((uintptr_t)ACTIVE_SCRIPT +
 			                    shortArg);
 			longjmp(SCRIPT_JMP_BUF, 1);
 		case (3 << 3):
@@ -953,7 +953,7 @@ void scriptIfInstruction(void)
 			}
 
 			SCRIPT_POINTER =
-				(uint8_t *)((uint32_t)ACTIVE_SCRIPT +
+				(uint8_t *)((uintptr_t)ACTIVE_SCRIPT +
 			                    shortArg);
 			longjmp(SCRIPT_JMP_BUF, 1);
 		case (4 << 3):
@@ -1081,7 +1081,7 @@ static void scriptInstruction28to3F__garbage__(int32_t op)
 		entry.scriptId = ACTIVE_MAP_SCRIPT;
 		entry.smth[0] = 1;
 		pushScriptStack(&entry);
-		SCRIPT_POINTER = (uint8_t *)((uint32_t)ACTIVE_SCRIPT + shortArg);
+		SCRIPT_POINTER = (uint8_t *)((uintptr_t)ACTIVE_SCRIPT + shortArg);
 		break;
 	}
 }
@@ -1840,7 +1840,7 @@ void scriptInstruction64to7E(op)
 			break;
 		case 0x33:
 			addFileReadRequestPath(MAIN_D_80130394,
-			                       (int32_t)BOSS_EFE_TMD_BUFFER, 0, 0, 0);
+			                       (intptr_t)BOSS_EFE_TMD_BUFFER, 0, 0, 0);
 			loadDynamicLibrary(EAB_REL, 0, 0, 0, 0);
 			readVBALLSection(5, 0x73);
 			loadMapSounds2(0x15);
@@ -1923,7 +1923,7 @@ void scriptInstruction64to7E(op)
 					PARTNER_PARA.remainingLifetime = 0;
 				}
 				ACTIVE_SCRIPT = getScript(0);
-				SCRIPT_POINTER = getScriptSection((uint8_t *)(int32_t)ACTIVE_SCRIPT, 0x4de);
+				SCRIPT_POINTER = getScriptSection((uint8_t *)(intptr_t)ACTIVE_SCRIPT, 0x4de);
 				break;
 			}
 			if (outcome == 0) {
@@ -2251,7 +2251,7 @@ void callScriptSection(scriptId, section, param)
 
 	ACTIVE_SCRIPT = getScript(scriptId);
 	SCRIPT_POINTER =
-		getScriptSection((uint8_t *)(int32_t)ACTIVE_SCRIPT,
+		getScriptSection((uint8_t *)(intptr_t)ACTIVE_SCRIPT,
 	                         section);
 	SCRIPT_SECTION_IS_EVENT = param;
 	SCRIPT_SECTION = section;

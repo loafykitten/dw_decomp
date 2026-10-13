@@ -3054,7 +3054,7 @@ Fish *FISH_findFishToBite(Fish *pool, VECTOR *loc, int32_t depth)
 	i = 0;
 	f = pool;
 	rowOff = (depth - 0x26) * 6;
-	for (; i < 0x21U; i++, f = (Fish *)((int32_t)f + 56)) {
+	for (; i < 0x21U; i++, f = (Fish *)((intptr_t)f + 56)) {
 #endif
 		if (!f->active) {
 			continue;

@@ -167,7 +167,7 @@ void updateTMDTextureData(int32_t *tmd, int32_t clutX, int32_t x, int32_t y, int
 	uint8_t mode;
 	uint32_t len;
 
-	tmd = (int32_t *)((int32_t)tmd + 8);
+	tmd = (int32_t *)((intptr_t)tmd + 8);
 	nObj = *tmd++;
 	obj = (struct TMD_STRUCT *)tmd;
 	clut = (y << 8) + x;

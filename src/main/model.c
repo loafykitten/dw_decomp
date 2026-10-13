@@ -2836,7 +2836,7 @@ void initializeDigimonObject(int32_t type, int32_t instanceId,
 	bone = DIGIMON_SKELETONS[type];
 	for (i = 0; i < boneCount; ++pos, ++bone, ++i) {
 		if (bone->objIndex != -1) {
-			GsLinkObject4((u_long)model->modelPtr->obj, &pos->obj, bone->objIndex);
+			GsLinkObject4((uintptr_t)model->modelPtr->obj, &pos->obj, bone->objIndex);
 		} else {
 			pos->obj.tmd = NULL;
 		}
@@ -3142,8 +3142,8 @@ void renderWireframed(GsDOBJ2 *obj, int32_t wireFrameShare)
 	TMD_P_TG4 *quad;
 	GsCOORDINATE2 *coord;
 	u_char *pk;
-	int32_t start;
-	uint32_t cur;
+	intptr_t start;
+	uintptr_t cur;
 	int32_t i;
 	int8_t color;
 	int16_t min;
@@ -3173,10 +3173,10 @@ void renderWireframed(GsDOBJ2 *obj, int32_t wireFrameShare)
 	for (i = 0; i < primn; i++) {
 		if ((prim[3] & 0xFC) == 0x34) {
 			tri = (TMD_P_TG3 *)prim;
-			cur = (uint32_t)prim;
+			cur = (uintptr_t)prim;
 			if (WIREFRAME_RNG_TABLE[i & 0xF] < wireFrameShare) {
 				gt3 = (POLY_GT3 *)pk;
-				start = (int32_t)pk;
+				start = (intptr_t)pk;
 				if (0 < RotNclip3(&vert[tri->v0], &vert[tri->v1],
 				                  &vert[tri->v2], (long *)&gt3->x0, (long *)&gt3->x1,
 				                  (long *)&gt3->x2, &p, &otz, &flag)) {
@@ -3194,7 +3194,7 @@ void renderWireframed(GsDOBJ2 *obj, int32_t wireFrameShare)
 				}
 			} else {
 				lf3 = (LINE_F4 *)pk;
-				start = (int32_t)pk;
+				start = (intptr_t)pk;
 				if (0 < RotNclip3(&vert[tri->v0], &vert[tri->v1],
 				                  &vert[tri->v2], (long *)&lf3->x0, (long *)&lf3->x1,
 				                  (long *)&lf3->x2, &p, &otz, &flag)) {
@@ -3216,7 +3216,7 @@ void renderWireframed(GsDOBJ2 *obj, int32_t wireFrameShare)
 			quad = (TMD_P_TG4 *)prim;
 			if (WIREFRAME_RNG_TABLE[i & 0xF] < wireFrameShare) {
 				gt4 = (POLY_GT4 *)pk;
-				start = (int32_t)pk;
+				start = (intptr_t)pk;
 				if (0 < RotNclip4(&vert[quad->v0], &vert[quad->v1],
 				                  &vert[quad->v2], &vert[quad->v3],
 				                  (long *)&gt4->x0, (long *)&gt4->x1, (long *)&gt4->x2, (long *)&gt4->x3, &p,
@@ -3258,7 +3258,7 @@ void renderWireframed(GsDOBJ2 *obj, int32_t wireFrameShare)
 					pk = (u_char *)lf2 + sizeof(LINE_F2);
 				}
 			}
-			prim = (u_char *)((uint32_t)prim + 0x24);
+			prim = (u_char *)((uintptr_t)prim + 0x24);
 		} else {
 			break;
 		}
@@ -3577,7 +3577,7 @@ void uploadModelTexture(void *textureData, ModelComponent *component)
 	DrawSync(0);
 }
 
-int32_t loadMMDAsync(int32_t digimonType, int32_t entityType, int32_t buffer,
+int32_t loadMMDAsync(int32_t digimonType, int32_t entityType, intptr_t buffer,
                      EvoModelData *modelData, uint8_t *readComplete)
 {
 	ModelComponent *m;

@@ -647,7 +647,7 @@ void STD_loadArenaAssets(id)
 	readFile(STD_ARENA_MODELS[id], STD_ARENA_MODEL);
 	GsMapModelingData((u_long *)&STD_ARENA_MODEL->flags);
 	for (i = 0; i < STD_ARENA_COUNTS.modelCount[id]; i++) {
-		GsLinkObject4((u_long)STD_ARENA_MODEL->obj, &STD_ARENA_OBJECTS[i], i);
+		GsLinkObject4((uintptr_t)STD_ARENA_MODEL->obj, &STD_ARENA_OBJECTS[i], i);
 		GsInitCoordinate2(NULL, &STD_ARENA_COORDS[i].coord);
 		STD_ARENA_OBJECTS[i].attribute = 0;
 		STD_ARENA_OBJECTS[i].coord2 = &STD_ARENA_COORDS[i].coord;

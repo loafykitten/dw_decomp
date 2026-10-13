@@ -728,7 +728,7 @@ void VS_startCameraIntro(Entity *target, Entity *entity)
 		VS_D_80071AE0[i] =
 			customRandom(0x50, DIGIMON_DATA[target->type].height * 180 / 100);
 	}
-	initializeSomeArenaArrays(0x16, (int32_t)VS_D_800706C8, (int32_t)VS_D_80071AE0, VS_D_80071A88);
+	initializeSomeArenaArrays(0x16, (intptr_t)VS_D_800706C8, (intptr_t)VS_D_80071AE0, VS_D_80071A88);
 
 	d = getDistance(delta.vx, 0, delta.vz) + 0x2bc;
 	VS_D_80071A30[0] = d;

@@ -420,8 +420,8 @@ int32_t ENDI_tickEnding(entity, isInitialized)
 	state->frame = 0;
 	state->phase = 0;
 	state->entity = entity;
-	ENDI_downloadClut((u_long)ENDI_CLUT_BUFFER);
-	ENDI_setClutStp((u_long)ENDI_CLUT_BUFFER);
+	ENDI_downloadClut((uintptr_t)ENDI_CLUT_BUFFER);
+	ENDI_setClutStp((uintptr_t)ENDI_CLUT_BUFFER);
 	ENDI_setModelSemiTrans(ENTITY_TABLE[0], 0x28);
 	PLAYER_SHADOW_ENABLED = 0;
 	addObject(0x812, instanceId, ENDI_updateEnding, ENDI_renderEndingObject);

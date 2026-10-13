@@ -1484,11 +1484,11 @@ void BTL_tickEFEEngine(void)
 			EFE_SUB_EFFECT_INDEX = 0;
 			while (EFE_SUB_EFFECT_INDEX < n) {
 				EFE_SCRIPT_CONTEXT = &EFE_DATA_ITERATOR->subEffects[EFE_SUB_EFFECT_INDEX];
-				if ((int32_t)EFE_SCRIPT_CONTEXT->inst != 0) {
+				if ((intptr_t)EFE_SCRIPT_CONTEXT->inst != 0) {
 					EFE_CURRENT_DATA_SEGMENT = EFE_SCRIPT_CONTEXT->instance;
-					EFE_PREVIOUS_DATA_SEGMENT = (int32_t)EFE_SCRIPT_CONTEXT->parentInstance;
-					((EfeInstance *)(int32_t)EFE_CURRENT_DATA_SEGMENT)->frame++;
-					BTL_runEFEScript((int32_t)EFE_SCRIPT_CONTEXT->inst);
+					EFE_PREVIOUS_DATA_SEGMENT = (intptr_t)EFE_SCRIPT_CONTEXT->parentInstance;
+					((EfeInstance *)(intptr_t)EFE_CURRENT_DATA_SEGMENT)->frame++;
+					BTL_runEFEScript((intptr_t)EFE_SCRIPT_CONTEXT->inst);
 				}
 				EFE_SUB_EFFECT_INDEX++;
 			}
@@ -1530,10 +1530,10 @@ void BTL_renderEFEEngine(void)
 			n = EFE_DATA_ITERATOR->numSubEffects;
 			for (j = 0; j < n; j++) {
 				EFE_SCRIPT_CONTEXT = &EFE_DATA_ITERATOR->subEffects[j];
-				if ((int32_t)EFE_SCRIPT_CONTEXT->inst != 0) {
+				if ((intptr_t)EFE_SCRIPT_CONTEXT->inst != 0) {
 					EFE_CURRENT_DATA_SEGMENT = EFE_SCRIPT_CONTEXT->instance;
-					EFE_PREVIOUS_DATA_SEGMENT = (int32_t)EFE_SCRIPT_CONTEXT->parentInstance;
-					BTL_runEFEScript((int32_t)EFE_SCRIPT_CONTEXT->someInst);
+					EFE_PREVIOUS_DATA_SEGMENT = (intptr_t)EFE_SCRIPT_CONTEXT->parentInstance;
+					BTL_runEFEScript((intptr_t)EFE_SCRIPT_CONTEXT->someInst);
 				}
 			}
 		}
@@ -1581,7 +1581,7 @@ void BTL_loadNextEFEFile(EfeLoad *arg)
 	char path[32];
 	CdlLOC loc;
 
-	p = (EfeLoad *)(int32_t)arg;
+	p = (EfeLoad *)(intptr_t)arg;
 	moves = p->moves;
 	p->state++;
 	id = *p->moves++;
@@ -1642,7 +1642,7 @@ void BTL_runEFESlotScript(int32_t idx)
 	EFE_SCRIPT_HEAD = EFE_DATA_ITERATOR->data;
 	EFE_SCRIPT_CONTEXT = EFE_DATA_ITERATOR->subEffects;
 	EFE_ACTIVE_SECTION = -1;
-	BTL_runEFEScript((int32_t)EFE_DATA_PTR[idx].startScript);
+	BTL_runEFEScript((intptr_t)EFE_DATA_PTR[idx].startScript);
 }
 
 char *BTL_getEFETextureSection(char *p)
@@ -1651,7 +1651,7 @@ char *BTL_getEFETextureSection(char *p)
 	char *section;
 
 	hdr = (EfeFileHeader *)p;
-	p = (char *)((uint32_t)p + 0x34);
+	p = (char *)((uintptr_t)p + 0x34);
 	if ((hdr->dataEnd - hdr->timStart) == 0) {
 		section = NULL;
 	} else {
@@ -1667,7 +1667,7 @@ char *BTL_getEFEModelSection(char *p)
 	char *section;
 
 	hdr = (EfeFileHeader *)p;
-	p = (char *)((uint32_t)p + 0x34);
+	p = (char *)((uintptr_t)p + 0x34);
 	if ((hdr->tmdEnd - hdr->tmdStart) == 0) {
 		section = NULL;
 	} else {
@@ -1789,7 +1789,7 @@ int32_t BTL_setupLoadedEFEFile(EfeLoad *load)
 		hdr = *(EfeFileHeader *)m->mmdPtr;
 		base = (char *)m->mmdPtr + 0x34;
 		EFE_HEAP_POINTER += (uint32_t)hdr.tmdEnd + 0x34;
-		EFE_DATA_ITERATOR->data = (int32_t)base;
+		EFE_DATA_ITERATOR->data = (intptr_t)base;
 		heap = EFE_HEAP_POINTER;
 		tmdp = (int32_t *)m->modelPtr;
 		if (hdr.tmdEnd - hdr.tmdStart == 0) {
@@ -1798,22 +1798,22 @@ int32_t BTL_setupLoadedEFEFile(EfeLoad *load)
 			EFE_DATA_ITERATOR->numObjects = tmdp[2];
 		}
 		EFE_DATA_ITERATOR->numSubEffects = hdr.numSubEffects;
-		EFE_DATA_ITERATOR->subEffects = (EfeSubEffect *)((uint32_t)base + hdr.subEffects);
+		EFE_DATA_ITERATOR->subEffects = (EfeSubEffect *)((uintptr_t)base + hdr.subEffects);
 		for (j = 0; j < hdr.numSubEffects; j++) {
 			EFE_DATA_ITERATOR->subEffects[j].inst = NULL;
 		}
 		n = EFE_DATA_ITERATOR->numObjects;
 		if (n != 0) {
-			EFE_DATA_ITERATOR->uvAnims = (EfeUvAnim *)((uint32_t)base + hdr.uvAnims);
+			EFE_DATA_ITERATOR->uvAnims = (EfeUvAnim *)((uintptr_t)base + hdr.uvAnims);
 			for (j = 0; j < n; j++) {
 				EFE_DATA_ITERATOR->uvAnims[j].unk0 = 0;
 				EFE_DATA_ITERATOR->uvAnims[j].numKeyframes = 0;
 			}
 		}
 		EFE_DATA_ITERATOR->effectId = hdr.effectId;
-		EFE_DATA_ITERATOR->startScript = (int16_t *)((int32_t)base + hdr.startScript);
-		EFE_DATA_ITERATOR->initScript = (int16_t *)((int32_t)base + hdr.initScript);
-		EFE_DATA_ITERATOR->uvAnimsEnd = (EfeUvAnim *)((int32_t)base + hdr.uvAnimsEnd);
+		EFE_DATA_ITERATOR->startScript = (int16_t *)((intptr_t)base + hdr.startScript);
+		EFE_DATA_ITERATOR->initScript = (int16_t *)((intptr_t)base + hdr.initScript);
+		EFE_DATA_ITERATOR->uvAnimsEnd = (EfeUvAnim *)((intptr_t)base + hdr.uvAnimsEnd);
 		EFE_CURRENT_DATA_SEGMENT = NULL;
 		EFE_SCRIPT_HEAD = EFE_DATA_ITERATOR->data;
 		EFE_SCRIPT_CONTEXT = EFE_DATA_ITERATOR->subEffects;
@@ -1887,8 +1887,8 @@ void BTL_tickEFEUVAnimation(int32_t idx)
 			}
 
 			BTL_offsetEFEPrimitiveUVs((char *)EFE_DATA_ITERATOR->model->modelPtr, idx,
-			                          *(int8_t *)((uint32_t)anim->uv + 2),
-			                          *(int8_t *)((uint32_t)anim->uv + 3));
+			                          *(int8_t *)((uintptr_t)anim->uv + 2),
+			                          *(int8_t *)((uintptr_t)anim->uv + 3));
 		}
 		anim->frame++;
 		anim->frame %= anim->numFrames;
@@ -1936,9 +1936,9 @@ void BTL_tickParticleEmitters(void)
 			RotMatrixZYX(&rot, &m);
 			ApplyMatrixSV(&m, &pt->direction, &pt->direction);
 
-			pt->position.vx = *(int32_t *)((uint32_t)&owner->transform.position.vx);
-			pt->position.vy = *(int32_t *)((uint32_t)&owner->transform.position.vy);
-			pt->position.vz = *(int32_t *)((uint32_t)&owner->transform.position.vz);
+			pt->position.vx = *(int32_t *)((uintptr_t)&owner->transform.position.vx);
+			pt->position.vy = *(int32_t *)((uintptr_t)&owner->transform.position.vy);
+			pt->position.vz = *(int32_t *)((uintptr_t)&owner->transform.position.vz);
 		}
 
 		for (k = 0; k < 0x14; k++) {
@@ -2045,7 +2045,7 @@ int16_t BTL_offsetEFEPrimitiveUVs(char *base, int32_t idx, int8_t du, int8_t dv)
 	int32_t i;
 	int32_t n;
 
-	base = (char *)((int32_t)base + 0xc);
+	base = (char *)((intptr_t)base + 0xc);
 	obj = (struct TMD_STRUCT *)base;
 	obj += idx;
 	n = obj->primn;
@@ -2123,25 +2123,25 @@ char *BTL_initializeEFEEngine(char *base)
 {
 	int32_t i;
 
-	base = (char *)((int32_t)base + (4 - ((int32_t)base & 3)));
+	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
 	EFE_DATA_PTR = (EfeSlot *)base;
 	for (i = 0; i < 0x10; i++) {
 		EFE_DATA_PTR[i].data = 0;
 		EFE_DATA_PTR[i].numObjects = 0;
 	}
 
-	base = (char *)((int32_t)base + 0x280);
-	base = (char *)((int32_t)base + (4 - ((int32_t)base & 3)));
+	base = (char *)((intptr_t)base + 0x280);
+	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
 	base = BTL_initializeParticleEmitters(base);
-	base = (char *)((int32_t)base + (4 - ((int32_t)base & 3)));
+	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
 	base = initializeFlashData(base);
 	base = BTL_initializeAuraProjectiles(base);
-	base = (char *)((int32_t)base + (4 - ((int32_t)base & 3)));
+	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
 	EFE_HEAP_BASE = base;
 	EFE_HEAP_POINTER = EFE_HEAP_BASE;
 	addObject(0x500, 0, (TickFunction)BTL_tickEFEEngine, (RenderFunction)BTL_renderEFEEngine);
 	BTL_initializeEFESubOpcodeTable();
-	base = (char *)((int32_t)base + 0x41000);
+	base = (char *)((intptr_t)base + 0x41000);
 	BTL_clearEFESoundChannels();
 
 	return base;
@@ -2277,9 +2277,9 @@ void BTL_applyBoxAttackHit(void)
 		r = EFE_SUB_EFFECT_INDEX;
 	}
 
-	center.vx = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	center.vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 8);
-	center.vz = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
+	center.vx = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	center.vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 8);
+	center.vz = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
 	box.center = &center;
 	copyVector(&box.extent, ext);
 	EFE_HIT_ENTITY_INDEX = 1;
@@ -2335,8 +2335,8 @@ void BTL_applyRadiusAttackHit(void)
 		radius = DIGIMON_DATA[e->type].radius;
 		radius *= radius;
 		radius += r;
-		dx = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4) - (int32_t)e->posData->location.vx;
-		dz = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0xc) - (int32_t)e->posData->location.vz;
+		dx = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4) - (int32_t)e->posData->location.vx;
+		dz = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0xc) - (int32_t)e->posData->location.vz;
 		dz = dz * dz + dx * dx;
 		if (radius < dz) {
 			goto next;
@@ -2372,8 +2372,8 @@ void BTL_applyLineAttackHit(void)
 	out = EFE_POP1(int32_t *);
 	arg = EFE_POP1(int32_t *);
 	*out = 0;
-	line[0].vx = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	line[0].vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
+	line[0].vx = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	line[0].vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
 	line[1].vx = EFE_SCRIPT_CONTEXT->sourceEntity->posData->location.vx;
 	line[1].vy = EFE_SCRIPT_CONTEXT->sourceEntity->posData->location.vz;
 	for (EFE_HIT_ENTITY_INDEX = 1; EFE_HIT_ENTITY_INDEX < 10; EFE_HIT_ENTITY_INDEX++) {
@@ -2398,7 +2398,7 @@ void BTL_applyLineAttackHit(void)
 		if (doSomethingWithSomePoints(rect, line) != -1) {
 			continue;
 		}
-		if (*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 8) < (-DIGIMON_DATA[e->type].height - arg[1])) {
+		if (*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 8) < (-DIGIMON_DATA[e->type].height - arg[1])) {
 			continue;
 		}
 		for (j = 1; j < 10; j++) {
@@ -2408,7 +2408,7 @@ void BTL_applyLineAttackHit(void)
 		}
 		((DigimonEntity *)ENTITY_TABLE[EFE_HIT_ENTITY_INDEX])->stats.current.isHit = 1;
 		BTL_calculateAttackHitPosition(&pos, e, EFE_SCRIPT_CONTEXT->sourceEntity, DIGIMON_DATA[e->type].radius);
-		pos.vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 8);
+		pos.vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 8);
 		addAttackObject(EFE_HIT_ENTITY_INDEX, 1, &pos, COMBAT_EFFECT_ITR, EFE_SUB_EFFECT_INDEX, j);
 		*out = 1;
 		return;
@@ -2610,12 +2610,12 @@ void BTL_renderRadialWaves(void)
 	EFE_WAVE_SCRATCH->tpage = EFE_DATA_ITERATOR->model->pixelPage | 0x20;
 	EFE_WAVE_SCRATCH->clut = EFE_DATA_ITERATOR->model->clutPage + 0x40;
 	EFE_SCRATCH->scale = EFE_POP1(VECTOR *);
-	EFE_SCRATCH->rot.vx = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[0];
-	EFE_SCRATCH->rot.vy = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[1];
-	EFE_SCRATCH->rot.vz = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[2];
-	EFE_SCRATCH->m1.t[0] = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))[0];
-	EFE_SCRATCH->m1.t[1] = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))[1];
-	EFE_SCRATCH->m1.t[2] = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))[2];
+	EFE_SCRATCH->rot.vx = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[0];
+	EFE_SCRATCH->rot.vy = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[1];
+	EFE_SCRATCH->rot.vz = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[2];
+	EFE_SCRATCH->m1.t[0] = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))[0];
+	EFE_SCRATCH->m1.t[1] = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))[1];
+	EFE_SCRATCH->m1.t[2] = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))[2];
 	EFE_WAVE_SCRATCH->phase = EFE_CURRENT_DATA_SEGMENT->frame * -400;
 
 	for (EFE_WAVE_SCRATCH->ring = 0; EFE_WAVE_SCRATCH->ring < 6; (EFE_WAVE_SCRATCH->ring)++) {
@@ -2723,19 +2723,19 @@ void BTL_drawTMDScreenSpace(void)
 {
 	EFE_SCRATCH->scale = EFE_POP1(VECTOR *);
 	EFE_SCRATCH->id = EFE_POP1(int32_t);
-	copyVector(&EFE_SCRATCH->rot, (VECTOR *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10));
+	copyVector(&EFE_SCRATCH->rot, (VECTOR *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10));
 	RotMatrixYXZ(&EFE_SCRATCH->rot, &EFE_SCRATCH->m0);
 	ScaleMatrix(&EFE_SCRATCH->m0, EFE_SCRATCH->scale);
-	EFE_SCRATCH->m0.t[0] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	EFE_SCRATCH->m0.t[1] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
-	EFE_SCRATCH->m0.t[2] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
+	EFE_SCRATCH->m0.t[0] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	EFE_SCRATCH->m0.t[1] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
+	EFE_SCRATCH->m0.t[2] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
 	EFE_SCRATCH->m0.t[0] += -DRAWING_OFFSET_X + 0xa0;
 	EFE_SCRATCH->m0.t[1] += -DRAWING_OFFSET_Y + 0x78;
 	TransposeMatrix(&GsWSMATRIX, &EFE_SCRATCH->m2);
 	MulMatrix0(&EFE_SCRATCH->m2, &EFE_SCRATCH->m0, &EFE_SCRATCH->m1);
 	GsSetLightMatrix(&EFE_SCRATCH->m1);
 	GsSetLsMatrix(&EFE_SCRATCH->m0);
-	GsLinkObject4((unsigned long)EFE_DATA_ITERATOR->model->modelPtr->obj, &EFE_SCRATCH->obj, EFE_SCRATCH->id);
+	GsLinkObject4((uintptr_t)EFE_DATA_ITERATOR->model->modelPtr->obj, &EFE_SCRATCH->obj, EFE_SCRATCH->id);
 	EFE_SCRATCH->obj.coord2 = NULL;
 	EFE_SCRATCH->obj.attribute = 0;
 	GsSortObject4J(&EFE_SCRATCH->obj, ACTIVE_ORDERING_TABLE, 2, EFE_SORT_WORKSPACE);
@@ -2775,14 +2775,14 @@ void BTL_drawTMDYXZ(void)
 {
 	EFE_SCRATCH->scale = EFE_POP1(VECTOR *);
 	EFE_SCRATCH->id = EFE_POP1(int32_t);
-	EFE_SCRATCH->rot.vx = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[0];
-	EFE_SCRATCH->rot.vy = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[1];
-	EFE_SCRATCH->rot.vz = ((int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[2];
+	EFE_SCRATCH->rot.vx = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[0];
+	EFE_SCRATCH->rot.vy = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[1];
+	EFE_SCRATCH->rot.vz = ((int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10))[2];
 	RotMatrixYXZ(&EFE_SCRATCH->rot, &EFE_SCRATCH->m1);
 	ScaleMatrix(&EFE_SCRATCH->m1, EFE_SCRATCH->scale);
-	EFE_SCRATCH->m1.t[0] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	EFE_SCRATCH->m1.t[1] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
-	EFE_SCRATCH->m1.t[2] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
+	EFE_SCRATCH->m1.t[0] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	EFE_SCRATCH->m1.t[1] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
+	EFE_SCRATCH->m1.t[2] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
 	GsMulCoord0(&GsWSMATRIX, &EFE_SCRATCH->m1, &EFE_SCRATCH->m0);
 	if (EFE_SCRATCH->m0.t[2] < -0x12c) {
 		return;
@@ -2794,7 +2794,7 @@ void BTL_drawTMDYXZ(void)
 
 	GsSetLightMatrix(&EFE_SCRATCH->m1);
 	GsSetLsMatrix(&EFE_SCRATCH->m0);
-	GsLinkObject4((unsigned long)EFE_DATA_ITERATOR->model->modelPtr->obj, &EFE_SCRATCH->obj, EFE_SCRATCH->id);
+	GsLinkObject4((uintptr_t)EFE_DATA_ITERATOR->model->modelPtr->obj, &EFE_SCRATCH->obj, EFE_SCRATCH->id);
 	EFE_SCRATCH->obj.coord2 = NULL;
 	EFE_SCRATCH->obj.attribute = 0;
 	GsSortObject4J(&EFE_SCRATCH->obj, ACTIVE_ORDERING_TABLE, 2, EFE_SORT_WORKSPACE);
@@ -2957,7 +2957,7 @@ void BTL_setTransformToBoneMatrix(void)
 	SVECTOR out;
 	long *p;
 
-	p = (long *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4);
+	p = (long *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4);
 	calculateBoneMatrix(EFE_SCRIPT_CONTEXT->sourceEntity, EFE_SCRIPT_CONTEXT->boneOffset->boneId, &m);
 	v.vx = EFE_SCRIPT_CONTEXT->boneOffset->positionX;
 	v.vy = EFE_SCRIPT_CONTEXT->boneOffset->positionY;
@@ -3004,9 +3004,9 @@ void BTL_renderWireframeBox(void)
 	base = EFE_POP1(EfeVector *);
 
 	PushMatrix();
-	rot.vx = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10);
-	rot.vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
-	rot.vz = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
+	rot.vx = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10);
+	rot.vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
+	rot.vz = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
 	RotMatrixZYX(&rot, &m);
 	scale.vx = 0x1000;
 	scale.vy = 0x1000;
@@ -3355,11 +3355,11 @@ void BTL_getTargetBoneTransform(void)
 	rotOut = EFE_POP1(EfeVector *);
 	posOut = EFE_POP1(EfeVector *);
 	idx = EFE_POP1(int32_t);
-	matrix = (GsCOORDINATE2 *)(((char **)(int32_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x10);
-	coord = (GsCOORDINATE2 *)(((char **)(int32_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + (idx * 136) + 0x10);
-	RotMatrix((SVECTOR *)(((char **)(int32_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x70), &matrix->coord);
-	ScaleMatrix(&matrix->coord, (VECTOR *)(((char **)(int32_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x60));
-	TransMatrix(&matrix->coord, (VECTOR *)(((char **)(int32_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x78));
+	matrix = (GsCOORDINATE2 *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x10);
+	coord = (GsCOORDINATE2 *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + (idx * 136) + 0x10);
+	RotMatrix((SVECTOR *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x70), &matrix->coord);
+	ScaleMatrix(&matrix->coord, (VECTOR *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x60));
+	TransMatrix(&matrix->coord, (VECTOR *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x78));
 	calculatePosition(coord, &m);
 	matrixToEuler2(&m, &rot);
 	copyVector(rotOut, &rot);
@@ -3375,13 +3375,13 @@ void BTL_centerTransformOnEntities(void)
 	int32_t count;
 	MATRIX *m;
 
-	sum = (EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4);
+	sum = (EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4);
 	sum->position.vx = 0;
 	sum->position.vy = 0;
 	sum->position.vz = 0;
-	*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10) = 0;
-	*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14) = 0;
-	*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18) = 0;
+	*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10) = 0;
+	*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14) = 0;
+	*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18) = 0;
 	count = 0;
 	for (i = 1; i < 10; i++) {
 		if (ENTITY_TABLE[i] == NULL) {
@@ -3528,9 +3528,9 @@ void BTL_findHitEntity(void)
 	mode = EFE_POP1(int32_t);
 	out = EFE_POP1(int32_t *);
 	*out = 0;
-	center.vx = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	center.vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 8);
-	center.vz = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
+	center.vx = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	center.vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 8);
+	center.vz = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
 	box.center = &center;
 	copyVector(&box.extent, ext);
 	EFE_HIT_ENTITY_INDEX = 1;
@@ -3687,12 +3687,12 @@ void BTL_applyHomingMovement(void)
 	minSpeed = EFE_POP1(int32_t);
 	target = EFE_POP1(EfeVector *);
 
-	pos = (int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4);
+	pos = (int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4);
 	d.vx = target->vx - pos[0];
 	d.vy = target->vy - pos[1];
 	d.vz = target->vz - pos[2];
 	rot.vx = 0;
-	rot.vy = -*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
+	rot.vy = -*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
 	rot.vz = 0;
 	RotMatrixZYX(&rot, &m);
 	ApplyMatrixSV(&m, &d, &out);
@@ -3717,11 +3717,11 @@ void BTL_applyHomingMovement(void)
 			dy = -limit;
 		}
 	}
-	*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14) += dy;
+	*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14) += dy;
 
 	pitch = _atan(out.vy, out.vz);
 	pitch -= 0x400;
-	pitch -= *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
+	pitch -= *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
 	pitch &= 0xfff;
 	if (pitch >= 0x801) {
 		pitch -= 0x1000;
@@ -3739,10 +3739,10 @@ void BTL_applyHomingMovement(void)
 			dp = -limit;
 		}
 	}
-	*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18) += dp;
+	*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18) += dp;
 
-	if (((*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18) & 0xfff) >= 0x400L) && ((*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18) & 0xfff) < 0xc00)) {
-		*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18) = 0x800 - *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
+	if (((*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18) & 0xfff) >= 0x400L) && ((*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18) & 0xfff) < 0xc00)) {
+		*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18) = 0x800 - *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
 	}
 
 	if (limit * 40 / 100 >= abs(dp) + abs(dy)) {
@@ -3762,13 +3762,13 @@ void BTL_applyHomingMovement(void)
 	d.vx = 0;
 	d.vy = 0;
 	d.vz = -*speed << 3;
-	rot.vx = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
+	rot.vx = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
 	rot.vy = 0;
 	rot.vz = 0;
 	RotMatrixZYX(&rot, &m);
 	ApplyMatrixSV(&m, &d, &out);
 	rot.vx = 0;
-	rot.vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
+	rot.vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
 	rot.vz = 0;
 	RotMatrixZYX(&rot, &m);
 	ApplyMatrixSV(&m, &out, &out);
@@ -3806,8 +3806,8 @@ void BTL_checkTargetCollision(void)
 	out2 = EFE_POP1(int32_t *);
 	out = EFE_POP1(EfeVector *);
 	tgt = EFE_SCRIPT_CONTEXT->targetEntity->posData->posMatrix.workm.t;
-	d0 = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx - tgt[0];
-	d1 = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0xc) - tgt[2];
+	d0 = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx - tgt[0];
+	d1 = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0xc) - tgt[2];
 	dist = d0 * d0 + d1 * d1;
 	if (r * r < dist) {
 		goto zero;
@@ -3835,12 +3835,12 @@ void BTL_rotateTransformTowardPoint(void)
 	int32_t angle;
 
 	p = EFE_POP1(EfeVector *);
-	q = (EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4);
+	q = (EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4);
 	angle = _atan(p->vx - q->position.vx, p->vz - q->position.vz);
 	angle -= 0x400;
 	angle = -angle;
 	angle &= 0xfff;
-	*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + (int32_t)&((EfeInstance *)0)->transform.rotation.vy) = angle;
+	*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + (intptr_t)&((EfeInstance *)0)->transform.rotation.vy) = angle;
 }
 
 void BTL_setTransformToSourceBone(void)
@@ -3852,7 +3852,7 @@ void BTL_setTransformToSourceBone(void)
 	int32_t s2;
 
 	idx = EFE_POP1(int32_t);
-	p = &((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	p = &((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
 	bone = &EFE_SCRIPT_CONTEXT->sourceEntity->posData[idx].posMatrix.workm;
 	*p++ = bone->t[0];
 	*p++ = bone->t[1];
@@ -3985,7 +3985,7 @@ void BTL_setTransformToBoneOffset(void)
 	SVECTOR out;
 	long *p;
 
-	p = (long *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4);
+	p = (long *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4);
 	calculateBoneMatrix(EFE_SCRIPT_CONTEXT->sourceEntity,
 	                    EFE_SCRIPT_CONTEXT->boneOffset->boneId, &m);
 	in.vx = EFE_SCRIPT_CONTEXT->boneOffset->positionX;
@@ -4360,7 +4360,7 @@ void BTL_copyTargetEntityPosition(void)
 	int32_t *m;
 
 	out = EFE_POP1(EfeVector *);
-	m = (int32_t *)(((char **)(int32_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x34);
+	m = (int32_t *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x34);
 	out->vx = m[5];
 	out->vy = m[6];
 	out->vz = m[7];
@@ -4381,9 +4381,9 @@ void BTL_steerTransformTowardPoint(void)
 	turn = EFE_POP1(int32_t);
 	speed = EFE_POP1(int32_t);
 	target = EFE_POP1(EfeVector *);
-	pos = (EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4);
+	pos = (EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4);
 	rot.vx = 0;
-	rot.vy = -*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
+	rot.vy = -*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
 	rot.vz = 0;
 	in.vx = target->vx - pos->position.vx;
 	in.vy = 0;
@@ -4411,10 +4411,10 @@ void BTL_steerTransformTowardPoint(void)
 	in.vx = 0;
 	in.vy = 0;
 	in.vz = -speed * 8;
-	rot.vx = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10);
-	*(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14) += turn;
-	rot.vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
-	rot.vz = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
+	rot.vx = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10);
+	*(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14) += turn;
+	rot.vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x14);
+	rot.vz = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x18);
 	RotMatrixZYX(&rot, &m);
 	ApplyMatrixSV(&m, &in, &out);
 	pos->position.vx += out.vx >> 3;
@@ -4465,7 +4465,7 @@ void BTL_getScatteredSpawnPosition(void)
 	}
 
 	if (EFE_PREVIOUS_DATA_SEGMENT == 0) {
-		p = (int32_t *)(((char **)(int32_t)EFE_SCRIPT_CONTEXT->sourceEntity)[1] + (*(int16_t *)(int32_t)EFE_SCRIPT_CONTEXT->boneOffset * 136) + 0x34);
+		p = (int32_t *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->sourceEntity)[1] + (*(int16_t *)(intptr_t)EFE_SCRIPT_CONTEXT->boneOffset * 136) + 0x34);
 		out->vx = p[5];
 		out->vy = p[6];
 		out->vz = p[7];
@@ -4499,11 +4499,11 @@ void BTL_addAttackObjectToTarget(void)
 		return;
 	}
 
-	pos.vx = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	pos.vy = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 8);
-	pos.vz = *(int32_t *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
+	pos.vx = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	pos.vy = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 8);
+	pos.vz = *(int32_t *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0xc);
 	for (i = 1; i < 10; i++) {
-		if ((int32_t)ENTITY_TABLE[i] == (int32_t)EFE_SCRIPT_CONTEXT->targetEntity) {
+		if ((intptr_t)ENTITY_TABLE[i] == (intptr_t)EFE_SCRIPT_CONTEXT->targetEntity) {
 			break;
 		}
 	}
@@ -4529,7 +4529,7 @@ void BTL_setTransformToTargetBone(void)
 
 	r = EFE_POP1(int32_t);
 	idx = EFE_POP1(int32_t);
-	p = &((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	p = &((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
 	bone = &EFE_SCRIPT_CONTEXT->targetEntity->posData[idx].posMatrix.workm;
 	*p++ = bone->t[0];
 	*p++ = bone->t[1];
@@ -4565,7 +4565,7 @@ void BTL_initializeEFETransform(void)
 	int32_t *dst;
 	int32_t *src;
 
-	dst = &((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	dst = &((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
 	if (EFE_PREVIOUS_DATA_SEGMENT == 0L) {
 		BTL_setTransformToBoneOffset();
 		return;
@@ -4584,12 +4584,12 @@ void BTL_drawTMD(void)
 {
 	EFE_SCRATCH->scale = EFE_POP1(VECTOR *);
 	EFE_SCRATCH->id = EFE_POP1(int32_t);
-	copyVector(&EFE_SCRATCH->rot, (VECTOR *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10));
+	copyVector(&EFE_SCRATCH->rot, (VECTOR *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10));
 	RotMatrix(&EFE_SCRATCH->rot, &EFE_SCRATCH->m1);
 	ScaleMatrix(&EFE_SCRATCH->m1, EFE_SCRATCH->scale);
-	EFE_SCRATCH->m1.t[0] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	EFE_SCRATCH->m1.t[1] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
-	EFE_SCRATCH->m1.t[2] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
+	EFE_SCRATCH->m1.t[0] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	EFE_SCRATCH->m1.t[1] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
+	EFE_SCRATCH->m1.t[2] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
 	GsMulCoord0(&GsWSMATRIX, &EFE_SCRATCH->m1, &EFE_SCRATCH->m0);
 	if (EFE_SCRATCH->m0.t[2] < -0x12c) {
 		return;
@@ -4601,7 +4601,7 @@ void BTL_drawTMD(void)
 
 	GsSetLightMatrix(&EFE_SCRATCH->m1);
 	GsSetLsMatrix(&EFE_SCRATCH->m0);
-	GsLinkObject4((unsigned long)EFE_DATA_ITERATOR->model->modelPtr->obj, &EFE_SCRATCH->obj, EFE_SCRATCH->id);
+	GsLinkObject4((uintptr_t)EFE_DATA_ITERATOR->model->modelPtr->obj, &EFE_SCRATCH->obj, EFE_SCRATCH->id);
 	EFE_SCRATCH->obj.coord2 = NULL;
 	EFE_SCRATCH->obj.attribute = 0;
 	GsSortObject4J(&EFE_SCRATCH->obj, ACTIVE_ORDERING_TABLE, 2, EFE_SORT_WORKSPACE);
@@ -4650,7 +4650,7 @@ void BTL_initializeUVAnim(void)
 	anim->keyframe = 0;
 	anim->frame = 1;
 	anim->numFrames = 0;
-	q = (uint32_t)anim->uvData;
+	q = (uintptr_t)anim->uvData;
 	for (i = 0; i < anim->numKeyframes; i++) {
 		anim->numFrames += (int32_t)*(int16_t *)q;
 		q += 4;
@@ -4670,7 +4670,7 @@ void BTL_checkTechCompatibility(void)
 			EFE_SCRIPT_PTR = NULL;
 			break;
 		}
-		entry = (EfeTechBoneOffset *)((int32_t)entry + 0xa);
+		entry = (EfeTechBoneOffset *)((intptr_t)entry + 0xa);
 	}
 
 	EFE_BONE_OFFSET = &entry->offset;
@@ -4696,7 +4696,7 @@ void BTL_spawnEFESubEffect(void)
 		if (instance->frame == -1) {
 			break;
 		}
-		instance = (EfeInstance *)((int32_t)instance + stride);
+		instance = (EfeInstance *)((intptr_t)instance + stride);
 	}
 
 	if (i == n) {
@@ -4715,13 +4715,13 @@ void BTL_spawnEFESubEffect(void)
 			break;
 		}
 		EFE_SCRIPT_CONTEXT++;
-		if ((int32_t)EFE_SCRIPT_CONTEXT >= (int32_t)EFE_DATA_ITERATOR->model->modelPtr) {
+		if ((intptr_t)EFE_SCRIPT_CONTEXT >= (intptr_t)EFE_DATA_ITERATOR->model->modelPtr) {
 			BTL_returnFromEFESubroutine();
 			return;
 		}
 	}
 
-	EFE_PREVIOUS_DATA_SEGMENT = (int32_t)EFE_CURRENT_DATA_SEGMENT;
+	EFE_PREVIOUS_DATA_SEGMENT = (intptr_t)EFE_CURRENT_DATA_SEGMENT;
 	EFE_CURRENT_DATA_SEGMENT = instance;
 	EFE_SCRIPT_CONTEXT->instance = EFE_CURRENT_DATA_SEGMENT;
 	EFE_SCRIPT_CONTEXT->parentInstance = (EfeInstance *)EFE_PREVIOUS_DATA_SEGMENT;
@@ -4734,21 +4734,21 @@ void BTL_spawnEFESubEffect(void)
 	}
 
 	MAIN_D_80134CDC = 1;
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 0xc);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 0xc);
 }
 
 void BTL_popEFEValueToVariable(void)
 {
 	int16_t *pc;
 
-	pc = (int16_t *)(int32_t)EFE_SCRIPT_PTR;
+	pc = (int16_t *)(intptr_t)EFE_SCRIPT_PTR;
 	if (pc[2] == 0) {
-		*(int32_t *)(pc[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT) = EFE_POP1(int32_t);
+		*(int32_t *)(pc[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT) = EFE_POP1(int32_t);
 	} else {
 		*(int32_t *)(pc[1] + EFE_SCRIPT_HEAD) = EFE_POP1(int32_t);
 	}
 
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 6);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
 void BTL_returnFromEFESubroutine(void)
@@ -4757,14 +4757,14 @@ void BTL_returnFromEFESubroutine(void)
 	if (EFE_SCRIPT_PTR != NULL) {
 		EFE_SCRIPT_CONTEXT = EFE_POP2(EfeSubEffect *);
 		EFE_CURRENT_DATA_SEGMENT = EFE_SCRIPT_CONTEXT->instance;
-		EFE_PREVIOUS_DATA_SEGMENT = (int32_t)EFE_SCRIPT_CONTEXT->parentInstance;
+		EFE_PREVIOUS_DATA_SEGMENT = (intptr_t)EFE_SCRIPT_CONTEXT->parentInstance;
 		EFE_TARGET_ENTITY_INDEX = EFE_POP2(int32_t);
 	}
 }
 
 void BTL_dispatchEFESubOpcode(void)
 {
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 2);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 2);
 	BTL_EFE_SUB_OPCODE_HANDLERS[EFE_SCRIPT_CURRENT_VALUE >> 8]();
 }
 
@@ -4783,16 +4783,16 @@ void BTL_pushEFEVariableAddress(void)
 {
 	int32_t ip;
 
-	ip = (int32_t)EFE_SCRIPT_PTR;
+	ip = (intptr_t)EFE_SCRIPT_PTR;
 
 	*EFE_DATA_STACK = ((int16_t *)ip)[1];
 	if (((int16_t *)ip)[2] == 0) {
-		*EFE_DATA_STACK++ += (int32_t)EFE_CURRENT_DATA_SEGMENT;
+		*EFE_DATA_STACK++ += (intptr_t)EFE_CURRENT_DATA_SEGMENT;
 	} else {
 		*EFE_DATA_STACK++ += EFE_SCRIPT_HEAD;
 	}
 
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 6);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
 void BTL_pushEFEVariable(void)
@@ -4800,9 +4800,9 @@ void BTL_pushEFEVariable(void)
 	int16_t *pc;
 	int32_t p;
 
-	pc = (int16_t *)(int32_t)EFE_SCRIPT_PTR;
+	pc = (int16_t *)(intptr_t)EFE_SCRIPT_PTR;
 	if (pc[2] == 0) {
-		p = pc[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT;
+		p = pc[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT;
 	} else {
 		p = pc[1] + EFE_SCRIPT_HEAD;
 	}
@@ -4815,23 +4815,23 @@ void BTL_pushEFEVariable(void)
 		EFE_PUSH1(int32_t, *(int8_t *)p);
 	}
 
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 6);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
 void BTL_pushEFEImmediate(void)
 {
 	int16_t *pc;
 
-	pc = (int16_t *)(int32_t)EFE_SCRIPT_PTR;
+	pc = (int16_t *)(intptr_t)EFE_SCRIPT_PTR;
 	EFE_PUSH1(int32_t, pc[1]);
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 6);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
 void BTL_jumpEFEScript(void)
 {
 	int16_t *pc;
 
-	pc = (int16_t *)(int32_t)EFE_SCRIPT_PTR;
+	pc = (int16_t *)(intptr_t)EFE_SCRIPT_PTR;
 	EFE_SCRIPT_PTR = (int16_t *)(pc[1] + EFE_SCRIPT_HEAD);
 }
 
@@ -4849,19 +4849,19 @@ void BTL_branchEFEOnComparison(void)
 	ip = EFE_SCRIPT_PTR;
 	if ((EFE_SCRIPT_CURRENT_VALUE & 0xf00) == 0x400) {
 		if (ip[2] == 0) {
-			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int32_t *)(ip[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT));
+			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int32_t *)(ip[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT));
 		} else {
 			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int32_t *)(ip[1] + EFE_SCRIPT_HEAD));
 		}
 	} else if ((EFE_SCRIPT_CURRENT_VALUE & 0xf00) == 0x200) {
 		if (ip[2] == 0) {
-			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int16_t *)(ip[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT));
+			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int16_t *)(ip[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT));
 		} else {
 			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int16_t *)(ip[1] + EFE_SCRIPT_HEAD));
 		}
 	} else {
 		if (ip[2] == 0) {
-			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int8_t *)(ip[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT));
+			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int8_t *)(ip[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT));
 		} else {
 			res = BTL_EFE_COMPARISONS[EFE_SCRIPT_CURRENT_VALUE >> 12](*(int8_t *)(ip[1] + EFE_SCRIPT_HEAD));
 		}
@@ -4870,7 +4870,7 @@ void BTL_branchEFEOnComparison(void)
 	if (res == 0) {
 		EFE_SCRIPT_PTR = (int16_t *)(ip[3] + EFE_SCRIPT_HEAD);
 	} else {
-		EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 0xa);
+		EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 0xa);
 	}
 }
 
@@ -4878,14 +4878,14 @@ void BTL_applyEFEVariableOperator(void)
 {
 	int16_t *pc;
 
-	pc = (int16_t *)(int32_t)EFE_SCRIPT_PTR;
+	pc = (int16_t *)(intptr_t)EFE_SCRIPT_PTR;
 	if (pc[2] == 0) {
-		BTL_EFE_VARIABLE_OPERATORS[(EFE_SCRIPT_CURRENT_VALUE >> 8) & 0xf][EFE_SCRIPT_CURRENT_VALUE >> 12](pc[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT);
+		BTL_EFE_VARIABLE_OPERATORS[(EFE_SCRIPT_CURRENT_VALUE >> 8) & 0xf][EFE_SCRIPT_CURRENT_VALUE >> 12](pc[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT);
 	} else {
 		BTL_EFE_VARIABLE_OPERATORS[(EFE_SCRIPT_CURRENT_VALUE >> 8) & 0xf][EFE_SCRIPT_CURRENT_VALUE >> 12](pc[1] + EFE_SCRIPT_HEAD);
 	}
 
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 6);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
 void BTL_loadEFEIndexedVariable(void)
@@ -4896,19 +4896,19 @@ void BTL_loadEFEIndexedVariable(void)
 	ip = EFE_SCRIPT_PTR;
 	if ((EFE_SCRIPT_CURRENT_VALUE & 0xf000) == 0x4000) {
 		if (ip[4] == 0) {
-			idx = *(int32_t *)(ip[3] + (int32_t)EFE_CURRENT_DATA_SEGMENT);
+			idx = *(int32_t *)(ip[3] + (intptr_t)EFE_CURRENT_DATA_SEGMENT);
 		} else {
 			idx = *(int32_t *)(ip[3] + EFE_SCRIPT_HEAD);
 		}
 	} else if ((EFE_SCRIPT_CURRENT_VALUE & 0xf000) == 0x2000) {
 		if (ip[4] == 0) {
-			idx = *(int16_t *)(ip[3] + (int32_t)EFE_CURRENT_DATA_SEGMENT);
+			idx = *(int16_t *)(ip[3] + (intptr_t)EFE_CURRENT_DATA_SEGMENT);
 		} else {
 			idx = *(int16_t *)(ip[3] + EFE_SCRIPT_HEAD);
 		}
 	} else {
 		if (ip[4] == 0) {
-			idx = *(int8_t *)(ip[3] + (int32_t)EFE_CURRENT_DATA_SEGMENT);
+			idx = *(int8_t *)(ip[3] + (intptr_t)EFE_CURRENT_DATA_SEGMENT);
 		} else {
 			idx = *(int8_t *)(ip[3] + EFE_SCRIPT_HEAD);
 		}
@@ -4922,13 +4922,13 @@ void BTL_loadEFEIndexedVariable(void)
 		EFE_SCRIPT_REGISTER = *(int8_t *)(ip[1] + idx + EFE_SCRIPT_HEAD);
 	}
 
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 0xa);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 0xa);
 }
 
 void BTL_loadEFERandomValue(void)
 {
 	EFE_SCRIPT_REGISTER = rand();
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 2);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 2);
 }
 
 void BTL_loadEFEVariable(void)
@@ -4938,34 +4938,34 @@ void BTL_loadEFEVariable(void)
 	ip = EFE_SCRIPT_PTR;
 	if ((EFE_SCRIPT_CURRENT_VALUE & 0xf00) == 0x400) {
 		if (ip[2] == 0) {
-			(*(int32_t *)&EFE_SCRIPT_REGISTER) = *(int32_t *)(ip[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT);
+			(*(int32_t *)&EFE_SCRIPT_REGISTER) = *(int32_t *)(ip[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT);
 		} else {
 			EFE_SCRIPT_REGISTER = *(int32_t *)(ip[1] + EFE_SCRIPT_HEAD);
 		}
 	} else if ((EFE_SCRIPT_CURRENT_VALUE & 0xf00) == 0x200) {
 		if (ip[2] == 0) {
-			EFE_SCRIPT_REGISTER = *(int16_t *)(ip[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT);
+			EFE_SCRIPT_REGISTER = *(int16_t *)(ip[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT);
 		} else {
 			EFE_SCRIPT_REGISTER = *(int16_t *)(ip[1] + EFE_SCRIPT_HEAD);
 		}
 	} else {
 		if (ip[2] == 0) {
-			EFE_SCRIPT_REGISTER = *(int8_t *)(ip[1] + (int32_t)EFE_CURRENT_DATA_SEGMENT);
+			EFE_SCRIPT_REGISTER = *(int8_t *)(ip[1] + (intptr_t)EFE_CURRENT_DATA_SEGMENT);
 		} else {
 			EFE_SCRIPT_REGISTER = *(int8_t *)(ip[1] + EFE_SCRIPT_HEAD);
 		}
 	}
 
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 6);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
 void BTL_loadEFEImmediate(void)
 {
 	int16_t *pc;
 
-	pc = (int16_t *)(int32_t)EFE_SCRIPT_PTR;
+	pc = (int16_t *)(intptr_t)EFE_SCRIPT_PTR;
 	EFE_SCRIPT_REGISTER = pc[1];
-	EFE_SCRIPT_PTR = (int16_t *)((int32_t)EFE_SCRIPT_PTR + 6);
+	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
 int32_t BTL_shiftRightInt32Variable(int32_t p)
@@ -5259,12 +5259,12 @@ void BTL_renderRibbonStrip(void)
 	EFE_RIBBON_SCRATCH->colorHalf.g = EFE_RIBBON_SCRATCH->color.g >> 1;
 	EFE_RIBBON_SCRATCH->colorHalf.b = EFE_RIBBON_SCRATCH->color.b >> 1;
 
-	copyVector(&EFE_SCRATCH->rot, (VECTOR *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 0x10));
+	copyVector(&EFE_SCRATCH->rot, (VECTOR *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 0x10));
 	RotMatrixYXZ(&EFE_SCRATCH->rot, &EFE_SCRATCH->m1);
 	ScaleMatrix(&EFE_SCRATCH->m1, EFE_SCRATCH->scale);
-	EFE_SCRATCH->m1.t[0] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
-	EFE_SCRATCH->m1.t[1] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
-	EFE_SCRATCH->m1.t[2] = ((EfeTransform *)((int32_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
+	EFE_SCRATCH->m1.t[0] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vx;
+	EFE_SCRATCH->m1.t[1] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vy;
+	EFE_SCRATCH->m1.t[2] = ((EfeTransform *)((intptr_t)EFE_CURRENT_DATA_SEGMENT + 4))->position.vz;
 	GsMulCoord0(&GsWSMATRIX, &EFE_SCRATCH->m1, &EFE_SCRATCH->m0);
 	GsSetLightMatrix(&EFE_SCRATCH->m1);
 	GsSetLsMatrix(&EFE_SCRATCH->m0);
@@ -5533,7 +5533,7 @@ void BTL_renderConfusionEffect(int32_t idx)
 
 void BTL_initializeConfusionEffect(char *base)
 {
-	BTL_CONFUSION_FX_MODEL = (int32_t)base;
+	BTL_CONFUSION_FX_MODEL = (intptr_t)base;
 	GsMapModelingData((unsigned long *)((char *)BTL_CONFUSION_FX_MODEL + 4));
 	setInt16WithStride(&BTL_CONFUSION_EFFECTS[0].frame, -1, 4, 0x10);
 }
@@ -5980,7 +5980,7 @@ void BTL_initializeFinisherAuraModel(char *tim, char *base)
 		GetClut(image.cx, image.cy);
 	}
 
-	BTL_FINISHER_AURA_MODEL = (int32_t)base;
+	BTL_FINISHER_AURA_MODEL = (intptr_t)base;
 	GsMapModelingData((unsigned long *)((char *)BTL_FINISHER_AURA_MODEL + 4));
 	ca = BTL_D_8007380C;
 	cb = BTL_D_8007381C;
@@ -6124,9 +6124,9 @@ char *BTL_initializeAuraProjectiles(char *base)
 {
 	int32_t i;
 
-	base = (char *)((int32_t)base + (4 - ((int32_t)base & 3)));
+	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
 	BTL_FLAT_BULLET_PTR = (EfeAura *)base;
-	base = (char *)((int32_t)base + 0x120);
+	base = (char *)((intptr_t)base + 0x120);
 	for (i = 0; i < 8; i++) {
 		BTL_FLAT_BULLET_PTR[i].frame = -1;
 	}

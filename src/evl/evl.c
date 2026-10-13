@@ -442,28 +442,28 @@ shards:
 					EVL_spawnSpark(&partner->digimonEntity.entity, (int16_t)bone, (int16_t)(0x11c - data->timer));
 					workm = &partner->digimonEntity.entity.posData[bone].posMatrix.workm;
 					*EFE_DATA_STACK++ = 1;
-					*EFE_DATA_STACK++ = (int32_t)workm->t;
+					*EFE_DATA_STACK++ = (intptr_t)workm->t;
 					*EFE_DATA_STACK++ = -1;
 					*EFE_DATA_STACK++ = 0xa;
 					*EFE_DATA_STACK++ = 0;
 					*EFE_DATA_STACK++ = 0x333;
 					colorStart.vx = colorStart.vy = colorStart.vz = 0x96;
 					colorEnd.vx = colorEnd.vy = colorEnd.vz = 0x14;
-					*EFE_DATA_STACK++ = (int32_t)&colorStart;
-					*EFE_DATA_STACK++ = (int32_t)&colorEnd;
+					*EFE_DATA_STACK++ = (intptr_t)&colorStart;
+					*EFE_DATA_STACK++ = (intptr_t)&colorEnd;
 					EFECreateFlash();
 				}
 			}
-		} else if ((int32_t)*(uint8_t **)&data->timer >= 0x9b) {
-			if ((int32_t)*(uint8_t **)&data->timer < 0x11c) {
+		} else if ((intptr_t)*(uint8_t **)&data->timer >= 0x9b) {
+			if ((intptr_t)*(uint8_t **)&data->timer < 0x11c) {
 				goto shards;
 			}
 		}
-		if ((int32_t)*(uint8_t **)&data->timer < 0xcc) {
+		if ((intptr_t)*(uint8_t **)&data->timer < 0xcc) {
 			tmp = DIGIMON_DATA[partner->digimonEntity.entity.type].radius;
 			size = DIGIMON_DATA[partner->digimonEntity.entity.type].height;
 			height = DIGIMON_DATA[partner->digimonEntity.entity.type].height;
-		} else if (((int32_t)*(uint8_t **)&data->timer >= 0xcc) && ((int32_t)*(uint8_t **)&data->timer < 0x108)) {
+		} else if (((intptr_t)*(uint8_t **)&data->timer >= 0xcc) && ((intptr_t)*(uint8_t **)&data->timer < 0x108)) {
 			scale = &partner->digimonEntity.entity.posData->scale;
 			rRatio = (DIGIMON_DATA[data->digimonId].radius << 12) / DIGIMON_DATA[partner->digimonEntity.entity.type].radius;
 			hRatio = (DIGIMON_DATA[data->digimonId].height << 12) / DIGIMON_DATA[partner->digimonEntity.entity.type].height;
@@ -473,7 +473,7 @@ shards:
 			tmp = lerp(DIGIMON_DATA[partner->digimonEntity.entity.type].radius, DIGIMON_DATA[data->digimonId].radius, 0xcc, 0x108, data->timer);
 			size = lerp(DIGIMON_DATA[partner->digimonEntity.entity.type].height, DIGIMON_DATA[data->digimonId].height, 0xcc, 0x108, data->timer);
 			height = lerp(DIGIMON_DATA[partner->digimonEntity.entity.type].height, DIGIMON_DATA[data->digimonId].height, 0xcc, 0x108, data->timer);
-		} else if ((int32_t)*(uint8_t **)&data->timer >= 0x108) {
+		} else if ((intptr_t)*(uint8_t **)&data->timer >= 0x108) {
 			tmp = DIGIMON_DATA[data->digimonId].radius;
 			size = DIGIMON_DATA[data->digimonId].height;
 			height = DIGIMON_DATA[data->digimonId].height;
@@ -482,7 +482,7 @@ shards:
 			if (data->timer >= 0xc3) {
 				MAIN_D_801351F8 += 0x16;
 			} else {
-				MAIN_D_801351F8 += lerp(0, 0x16, 0xa4, 0xc2, (int32_t)*(uint8_t **)&data->timer);
+				MAIN_D_801351F8 += lerp(0, 0x16, 0xa4, 0xc2, (intptr_t)*(uint8_t **)&data->timer);
 			}
 			rot = MAIN_D_801349EC;
 			rot.vy = MAIN_D_801351F8 + partner->digimonEntity.entity.posData->rotation.vy;
@@ -507,7 +507,7 @@ shards:
 		if ((frame >= 0xd7) && (frame < 0x11c) && ((frame & 1) == 0)) {
 			workm = &partner->digimonEntity.entity.posData[1].posMatrix.workm;
 			*EFE_DATA_STACK++ = 0;
-			*EFE_DATA_STACK++ = (int32_t)workm->t;
+			*EFE_DATA_STACK++ = (intptr_t)workm->t;
 			tmp = lerp(5, 1, 0xd6, 0x11c, frame);
 			if ((frame & tmp) == 0) {
 				*EFE_DATA_STACK++ = 0x21;
@@ -523,8 +523,8 @@ shards:
 			colorStart.vy = tmp + (rand() % 100);
 			colorStart.vz = tmp + (rand() % 100);
 			colorEnd.vx = colorEnd.vy = colorEnd.vz = 0x14;
-			*EFE_DATA_STACK++ = (int32_t)&colorStart;
-			*EFE_DATA_STACK++ = (int32_t)&colorEnd;
+			*EFE_DATA_STACK++ = (intptr_t)&colorStart;
+			*EFE_DATA_STACK++ = (intptr_t)&colorEnd;
 			EFECreateFlash();
 		}
 		if (frame == 0x11c) {
@@ -537,7 +537,7 @@ shards:
 			}
 			EVL_applyEvolution(ENTITY_TABLE[1], &PARTNER_ENTITY.digimonEntity.stats, data->para, data->evoTarget);
 			waitForSoundBufferLoading(3);
-			partner = (PartnerEntity *)((uint32_t)&PARTNER_ENTITY);
+			partner = (PartnerEntity *)((uintptr_t)&PARTNER_ENTITY);
 			data->partner = partner;
 			startAnimation(&PARTNER_ENTITY.digimonEntity.entity, 0);
 		}
@@ -1032,7 +1032,7 @@ int32_t EVL_buildShardSet(Entity *entity, int32_t objIndex, int32_t bone)
 	model = getEntityModelComponent(entity->type, 3);
 	tmd = model->modelPtr;
 	header = tmd;
-	objects = (struct TMD_STRUCT *)((uint32_t)header + 12);
+	objects = (struct TMD_STRUCT *)((uintptr_t)header + 12);
 	obj = &objects[objIndex];
 
 	for (slot = 0; slot < 30; slot++) {
@@ -1063,11 +1063,11 @@ int32_t EVL_buildShardSet(Entity *entity, int32_t objIndex, int32_t bone)
 	entry->model = (int32_t *)entity;
 	entry->bone = bone;
 	entry->vertices = outStart;
-	entry->primitives = (int32_t)obj->primtop;
+	entry->primitives = (intptr_t)obj->primtop;
 	entry->centerCount = obj->primn;
 	addObject(0x604, slot, EVL_tickShardSet, EVL_renderShardSet);
 
-	prim = (int32_t)obj->primtop;
+	prim = (intptr_t)obj->primtop;
 	for (j = 0; (uint32_t)j < obj->primn; j++) {
 		switch (((int8_t *)prim)[3]) {
 		case 0x34:
@@ -1294,11 +1294,11 @@ void EVL_initEvoSequence(void)
 	copyVector(&EVL_D_80064D40, &partner->digimonEntity.entity.posData->location);
 	downloadCLUT1(EVL_D_80063F3C);
 	downloadCLUT2(EVL_D_80064D50);
-	EVL_storeDigimonClut((int32_t)EVL_D_80065094, &partner->digimonEntity.entity);
-	EVL_storeClutBank0((int32_t)EVL_D_80065398);
-	EVL_storeClutBank1((int32_t)EVL_D_8006569C);
-	EVL_initShardSets((int32_t)EVL_D_80065FA0);
-	EVL_setScratchTop((int32_t)EVL_D_80066274);
+	EVL_storeDigimonClut((intptr_t)EVL_D_80065094, &partner->digimonEntity.entity);
+	EVL_storeClutBank0((intptr_t)EVL_D_80065398);
+	EVL_storeClutBank1((intptr_t)EVL_D_8006569C);
+	EVL_initShardSets((intptr_t)EVL_D_80065FA0);
+	EVL_setScratchTop((intptr_t)EVL_D_80066274);
 	initializeFlashData((char *)EVL_D_800677B0.data);
 	EVL_resetParticles();
 	EVL_resetSparks();

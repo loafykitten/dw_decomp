@@ -109,7 +109,7 @@ int16_t isInitialized;
 	IS_LOAD_EVL_COMPLETE = 0;
 	addObject(0x809, instanceId, tickEvoSequenceLoading, renderEvoSequenceLoading);
 
-	return (int32_t)buffer;
+	return (intptr_t)buffer;
 }
 
 int evoSequenceAlwaysTrue(int32_t unused)

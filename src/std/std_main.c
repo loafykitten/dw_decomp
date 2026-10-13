@@ -2827,7 +2827,7 @@ void STD_startCameraIntro(Entity *target, Entity *entity)
 		STD_D_8007BA9C[i] =
 			customRandom(0x50, DIGIMON_DATA[target->type].height * 180 / 100);
 	}
-	initializeSomeArenaArrays(0x16, (int32_t)STD_D_8007A41C, (int32_t)STD_D_8007BA9C, STD_D_8007BA44);
+	initializeSomeArenaArrays(0x16, (intptr_t)STD_D_8007A41C, (intptr_t)STD_D_8007BA9C, STD_D_8007BA44);
 
 	d = getDistance(delta.vx, 0, delta.vz) + 0x2bc;
 	STD_D_8007B9EC[0] = d;

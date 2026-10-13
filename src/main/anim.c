@@ -217,7 +217,7 @@ void startAnimation(entity, animId)
 	if (animTable[animId] == 0)
 		return;
 
-	instrPtr = (int16_t *)((int32_t)animTable + animTable[animId]);
+	instrPtr = (int16_t *)((intptr_t)animTable + animTable[animId]);
 	anim = &entity->anim;
 	boneCount = DIGIMON_DATA[entity->type].boneCount;
 	posData = entity->posData;

@@ -2946,7 +2946,7 @@ void fillNamingMenuStrings(void)
 
 	box = &TEXTBOX_DATA.box[1];
 	buf = TEXTBOX_LINES_PTR + box->vramRow * TEXTBOX_LINE_SIZE;
-	buf = (uint8_t *)((uint32_t)buf + (box->backPage ^ 1) * box->vramRows * TEXTBOX_LINE_SIZE);
+	buf = (uint8_t *)((uintptr_t)buf + (box->backPage ^ 1) * box->vramRows * TEXTBOX_LINE_SIZE);
 	line = buf;
 	*buf++ = 1;
 	*buf++ = 7;

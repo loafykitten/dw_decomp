@@ -2380,7 +2380,7 @@ void equipMove(void)
 int32_t loadCardImage(id)
 int8_t id;
 {
-	return loadStackedTIMEntry(MAIN_D_80123E78, (u_long)TEXTURE_BUFFER,
+	return loadStackedTIMEntry(MAIN_D_80123E78, (uintptr_t)TEXTURE_BUFFER,
 	                           id * 0xe, 0xe);
 }
 

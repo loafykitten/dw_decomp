@@ -1326,7 +1326,7 @@ void VS_loadVersusSceneModel(void)
 	GsMapModelingData((u_long *)(VS_DRAW_MODEL_BUFFER + 4));
 
 	for (i = 0; i < 4; i++) {
-		GsLinkObject4((u_long)(VS_DRAW_MODEL_BUFFER + 0xc), &VS_VERSUS_MODEL_OBJECTS[i].data.obj, i);
+		GsLinkObject4((uintptr_t)(VS_DRAW_MODEL_BUFFER + 0xc), &VS_VERSUS_MODEL_OBJECTS[i].data.obj, i);
 		GsInitCoordinate2(NULL, &VS_VERSUS_MODEL_OBJECTS[i].data.posMatrix);
 		VS_VERSUS_MODEL_OBJECTS[i].data.obj.attribute = 0;
 		VS_VERSUS_MODEL_OBJECTS[i].data.obj.coord2 = &VS_VERSUS_MODEL_OBJECTS[i].data.posMatrix;
@@ -1435,7 +1435,7 @@ void VS_loadStageModels(void)
 	readFile(VS_PATH_STDDAT_1P2PWIN_TMD, buf);
 	GsMapModelingData((u_long *)(buf + 4));
 	for (i = 0; i < 7; i++) {
-		GsLinkObject4((u_long)(buf + 0xc), &VS_RESULT_MODEL_OBJECTS[i].data.obj, i);
+		GsLinkObject4((uintptr_t)(buf + 0xc), &VS_RESULT_MODEL_OBJECTS[i].data.obj, i);
 		GsInitCoordinate2(NULL, &VS_RESULT_MODEL_OBJECTS[i].data.posMatrix);
 		VS_RESULT_MODEL_OBJECTS[i].data.obj.attribute = 0;
 		VS_RESULT_MODEL_OBJECTS[i].data.obj.coord2 = &VS_RESULT_MODEL_OBJECTS[i].data.posMatrix;
