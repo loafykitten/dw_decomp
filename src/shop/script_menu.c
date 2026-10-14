@@ -2668,6 +2668,12 @@ void setupNewGameDialogueBox(void)
 	DRAW_STRING2_IS_FIXED_WIDTH = 0;
 #endif
 	for (i = 2; i < 10; i++) {
+#ifdef DW1_NATIVE
+		/* The PS1 reads the type byte of a null entry from low RAM (never 0x75). */
+		if (ENTITY_TABLE[i] == NULL) {
+			continue;
+		}
+#endif
 		if (ENTITY_TABLE[i]->type == 0x75) {
 			getEntityScreenPos(ENTITY_TABLE[i], 1, &screenPos);
 		}
