@@ -207,6 +207,13 @@ static void *main_menu_sbss_order[] = {
 
 SaveSlotPreview SAVEGAME_SLOT_INFO[15];
 
+#ifdef DW1_NATIVE
+/* Save slots (dw1_pc_saves): a used slot's second line, blank in the US game (its card titles
+ * have no place), shows where the save was made and on which day (readPcSlotLocation). */
+static char PC_SLOT_PLACE[15][24];
+static char PC_SLOT_DAY[15][12];
+#endif
+
 extern int8_t MAIN_STATE;
 extern uint8_t CURRENT_SCREEN;
 extern uint8_t PREVIOUS_SCREEN;
@@ -1776,6 +1783,12 @@ void renderSaveSlotBox(int32_t slot, int32_t x, int32_t y)
 	} else {
 		renderText(cur++, x + 0x28, y + 5, 0x90, 0, 0x6c, 0xc, hl);
 #else
+#ifdef DW1_NATIVE
+		/* From 8 pixels further left, where drawPcSlotLine can move a long place. */
+		if (dw1_pc_saves) {
+			renderText(cur++, x + 0x20, y + 0x13, 0x10, v + 0xC, 0xD0, 0xC, hl);
+		} else
+#endif
 		renderText(cur++, x + 0x28, y + 0x13, 0x18, v + 0xC, 0xE0, 0xC, hl);
 #endif
 	}
@@ -1872,6 +1885,12 @@ void renderConfirmSlotSelection(void)
 #if !VERSION_IS(US)
 		renderText(cur++, 0x58, 0x3c, 0x18, 0x18, 0x6c, 0xc, 0);
 #else
+#ifdef DW1_NATIVE
+		/* Drawn from x 0x18 as in the slot list (drawPcSlotLine). */
+		if (dw1_pc_saves) {
+			renderText(cur++, 0x40, 0x3C, 0, 0x18, 0xE0, 0xC, 0);
+		} else
+#endif
 		renderText(cur++, 0x58, 0x3C, 0, 0x18, 0xE0, 0xC, 0);
 #endif
 	} else {
@@ -2301,6 +2320,29 @@ static char PC_SAVES_BATTLE[] = "BATTLE";
 
 /* A slot list's or slot confirmation's title: the title menu's item, or Battle Mode's with
  * the player choosing ("BATTLE MODE" and the player don't fit the title box). */
+/*
+ * A used slot's second line at text row `y`: the place under the player's name (moved left
+ * when it would run past the box: only "Mt. Panorama Spore Area" does, by 8 pixels, which the
+ * screens show), and the day at the box's right edge when there is room for it after the place.
+ */
+#define PC_SLOT_LINE_X 0x18
+#define PC_SLOT_LINE_W 0xB1
+static void drawPcSlotLine(int32_t slot, int32_t y)
+{
+	int32_t placeW;
+	int32_t dayW;
+
+	placeW = dw1_text_width(PC_SLOT_PLACE[slot]);
+	dayW = dw1_text_width(PC_SLOT_DAY[slot]);
+	drawString(PC_SLOT_PLACE[slot],
+		   PC_SLOT_LINE_X - (placeW > PC_SLOT_LINE_W ? placeW - PC_SLOT_LINE_W : 0), y);
+	DrawSync(0);
+	if (dayW != 0 && placeW + 8 + dayW <= PC_SLOT_LINE_W) {
+		drawString(PC_SLOT_DAY[slot], PC_SLOT_LINE_X + PC_SLOT_LINE_W - dayW, y);
+		DrawSync(0);
+	}
+}
+
 static void drawPcSlotTitle(char *buf)
 {
 	if (MAIN_MENU_ACTION == 5) {
@@ -3036,6 +3078,11 @@ void drawMainMenuStrings(int32_t menu)
 		DrawSync(0);
 		drawString(SAVEGAME_SLOT_INFO[MEMORY_CARD_SLOT].digimonName, 0x6C, 0xC);
 		DrawSync(0);
+#ifdef DW1_NATIVE
+		if (dw1_pc_saves) {
+			drawPcSlotLine(MEMORY_CARD_SLOT, 0x18);
+		} else
+#endif
 		drawString(SAVEGAME_SLOT_INFO[MEMORY_CARD_SLOT].location, 0, 0x18);
 		DrawSync(0);
 		drawString(SAVEGAME_ID_LABEL[MEMORY_CARD_SLOT + 1], 0, 0x30);
@@ -3263,6 +3310,11 @@ void drawSaveSlotText(int32_t slot, int32_t row)
 		DrawSync(0);
 		drawString(SAVEGAME_SLOT_INFO[slot].digimonName, 0x6C, row + 0xC);
 		DrawSync(0);
+#ifdef DW1_NATIVE
+		if (dw1_pc_saves) {
+			drawPcSlotLine(slot, row + 0x18);
+		} else
+#endif
 		drawString(SAVEGAME_SLOT_INFO[slot].location, 0x18, row + 0x18);
 		DrawSync(0);
 #endif
@@ -4938,6 +4990,65 @@ int32_t getCardUsedBlockCount(int32_t channel, int32_t returnMenu)
 	return blocks;
 }
 
+#ifdef DW1_NATIVE
+#if VERSION_IS(US)
+extern char *MAP_NAME_PTR[];
+#endif
+
+static SavegamePayload PC_SLOT_SAVE;
+
+/* Save slots: reads the save in `name` (the first of its two copies, which the app writes the
+ * same) for `slot`'s second line: the place, as the loading screen names it, and the day,
+ * counted from the first (the in-game calendar's Year 2 Day 1 is Day 31, as for the "Survived
+ * for 300 days" medal). */
+static void readPcSlotLocation(int32_t channel, char *name, int32_t slot)
+{
+	MemCardSyncWord cmd;
+	MemCardSyncWord result;
+	char *place;
+	int32_t len;
+	int32_t id;
+
+	if (slot < 0 || slot >= 15) {
+		return;
+	}
+	PC_SLOT_PLACE[slot][0] = '\0';
+	PC_SLOT_DAY[slot][0] = '\0';
+	if (MemCardReadFile(channel, name, (void *)&PC_SLOT_SAVE, 0x200, sizeof(PC_SLOT_SAVE)) != 1) {
+		return;
+	}
+	MemCardSync(0, &cmd, &result);
+	if (result != 0) {
+		return;
+	}
+	/* MAP_ENTRIES has 255 screens, MAP_NAME_PTR 70 names (map.c). */
+	if (PC_SLOT_SAVE.currentScreen < 255) {
+		id = MAP_ENTRIES[PC_SLOT_SAVE.currentScreen].loadingName;
+		if (id >= 0 && id < 70) {
+			/* The US names are centred in spaces for the loading screen. */
+			place = MAP_NAME_PTR[id];
+			while (*place == ' ') {
+				place++;
+			}
+			len = strlen(place);
+			while (len > 0 && place[len - 1] == ' ') {
+				len--;
+			}
+			if (len > (int32_t)sizeof(PC_SLOT_PLACE[slot]) - 1) {
+				len = sizeof(PC_SLOT_PLACE[slot]) - 1;
+			}
+			memcpy(PC_SLOT_PLACE[slot], place, len);
+			PC_SLOT_PLACE[slot][len] = '\0';
+		}
+	}
+	/* The clock keeps DAY in 0..29 (clock.c); anything else isn't a date to show. */
+	if (PC_SLOT_SAVE.year >= 0 && PC_SLOT_SAVE.year < 1000 && PC_SLOT_SAVE.day >= 0 &&
+	    PC_SLOT_SAVE.day < 30) {
+		sprintf(PC_SLOT_DAY[slot], "Day %d", PC_SLOT_SAVE.year * 30 + PC_SLOT_SAVE.day + 1);
+	}
+}
+#endif
+
 int32_t loadSaveSlotData(int32_t channel, char *filename, SaveSlotPreview *slots, int32_t unused)
 {
 	MemCardSyncWord cmd;
@@ -4966,6 +5077,10 @@ int32_t loadSaveSlotData(int32_t channel, char *filename, SaveSlotPreview *slots
 
 	for (i = 0; i < 15; i++) {
 		slots[i].valid = 0;
+#ifdef DW1_NATIVE
+		PC_SLOT_PLACE[i][0] = '\0';
+		PC_SLOT_DAY[i][0] = '\0';
+#endif
 	}
 	for (i = 0; i < fileCount; i++) {
 		if ((MEMCARD_DIRENTRIES[i].name[15] >= '0') &&
@@ -5002,6 +5117,11 @@ int32_t loadSaveSlotData(int32_t channel, char *filename, SaveSlotPreview *slots
 			slots[slot].digimonName[17] = '\0';
 			strncpy(slots[slot].location, (char *)&data[0x32], 24);
 			slots[slot].location[23] = '\0';
+#endif
+#ifdef DW1_NATIVE
+			if (dw1_pc_saves) {
+				readPcSlotLocation(channel, MEMCARD_DIRENTRIES[i].name, slot);
+			}
 #endif
 		} else {
 			setMemoryCardReadError(result, 0);

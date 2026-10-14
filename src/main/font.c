@@ -1762,3 +1762,29 @@ void drawString(str, x, y)
 	}
 }
 #endif
+
+#if defined(DW1_NATIVE) && VERSION_IS(US)
+/* How wide drawString draws ASCII `str`, for the Mac app's additions to lay text out. A
+ * character with no glyph counts as the last glyph, as drawGlyph draws it. */
+int32_t dw1_text_width(char *str)
+{
+	uint16_t code;
+	int32_t width;
+	int32_t n;
+
+	width = 0;
+	for (; *str != '\0'; str++) {
+		if (*str == '.') {
+			code = 0x8142;
+		} else if (*str == '\'') {
+			code = 0x8175;
+		} else {
+			code = convertAsciiToJis(*str);
+		}
+		for (n = 0; n < NUM_GLYPHS - 1 && CHAR_TO_GLYPH_TABLE[n] != code; n++) {
+		}
+		width += GLYPH_DATA[n].width;
+	}
+	return width;
+}
+#endif
