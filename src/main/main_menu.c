@@ -1753,6 +1753,12 @@ void renderSaveSlotBox(int32_t slot, int32_t x, int32_t y)
 	} else {
 		hl = 1;
 	}
+#ifdef DW1_NATIVE
+	if (dw1_pc_saves && MAIN_MENU_ACTION == 0) {
+		/* A new game can take any slot (a used one after asking). */
+		hl = 0;
+	}
+#endif
 	renderText(cur++, x + 0xA, y + 5, 0, v, 0x18, 0xC, hl);
 #if VERSION_IS(EU)
 	if (SAVEGAME_SLOT_INFO[slot].valid != 0) {
@@ -2279,6 +2285,31 @@ void renderInsertGameCardPrompt(void)
 	GsSetWorkBase((PACKET *)cur);
 	renderMenuBox(0x3c, 0x32, 0xc8, 0x2e);
 	renderMenuBox(0x3c, 0x60, 0x38, 0x22);
+}
+#endif
+
+#ifdef DW1_NATIVE
+/*
+ * The Mac app's save slots (dw1_pc_saves, crates/dw1/src/saves.rs): the saves are the slots
+ * of one card that is always there, so the screens skip the card steps and say nothing about
+ * memory cards.
+ */
+static char PC_SAVES_OVERWRITE_QUESTION[] = "Overwrite adventure?";
+static char PC_SAVES_TRAINING[] = "training, and cannot";
+static char PC_SAVES_ERROR_TITLE[] = "Save Data";
+static char PC_SAVES_BATTLE[] = "BATTLE";
+
+/* A slot list's or slot confirmation's title: the title menu's item, or Battle Mode's with
+ * the player choosing ("BATTLE MODE" and the player don't fit the title box). */
+static void drawPcSlotTitle(char *buf)
+{
+	if (MAIN_MENU_ACTION == 5) {
+		strcpy(buf, PC_SAVES_BATTLE);
+		strcat(buf, VS_PLAYER_INDEX == 0 ? ":  PLAYER 1" : ":  PLAYER 2");
+		drawString(buf, 0, 0);
+	} else {
+		drawString(TITLE_MENU_ITEMS[MAIN_MENU_ACTION], 0, 0);
+	}
 }
 #endif
 
@@ -2916,6 +2947,13 @@ void drawMainMenuStrings(int32_t menu)
 		MAIN_D_80135054 = 2;
 		break;
 	case 5:
+#ifdef DW1_NATIVE
+		if (dw1_pc_saves) {
+			/* The card checks left are all on the way to a save. */
+			drawString(MEMORY_CARD_OPERATION_MESSAGES[MEMORY_CARD_OPERATION == 0 ? 1 : MEMORY_CARD_OPERATION], 0, 0);
+			break;
+		}
+#endif
 		drawString(MEMORY_CARD_OPERATION_MESSAGES[MEMORY_CARD_OPERATION], 0, 0);
 		DrawSync(0);
 		drawString(MAIN_D_80131278, 0, 0xC);
@@ -2936,6 +2974,11 @@ void drawMainMenuStrings(int32_t menu)
 		drawString(STR_YES_NO, 0, 0xF0);
 		break;
 	case 7:
+#ifdef DW1_NATIVE
+		if (dw1_pc_saves) {
+			drawPcSlotTitle(buf);
+		} else
+#endif
 		drawString(SLOT_ACTION_TITLES[MAIN_MENU_ACTION], 0, 0);
 		DrawSync(0);
 		if (MAIN_MENU_ACTION == 0 || MAIN_MENU_ACTION == 1 ||
@@ -2967,6 +3010,11 @@ void drawMainMenuStrings(int32_t menu)
 		drawString(STR_YES_NO_SPACED, 0, 0xF0);
 		break;
 	case 8:
+#ifdef DW1_NATIVE
+		if (dw1_pc_saves) {
+			drawPcSlotTitle(buf);
+		} else
+#endif
 		drawString(SLOT_ACTION_TITLES[MAIN_MENU_ACTION], 0, 0);
 		if (MAIN_MENU_ACTION == 0 || MAIN_MENU_ACTION == 1 ||
 		    MAIN_MENU_ACTION == 2) {
@@ -2992,6 +3040,14 @@ void drawMainMenuStrings(int32_t menu)
 		DrawSync(0);
 		drawString(SAVEGAME_ID_LABEL[MEMORY_CARD_SLOT + 1], 0, 0x30);
 		DrawSync(0);
+#ifdef DW1_NATIVE
+		if (dw1_pc_saves && MAIN_MENU_ACTION == 0 &&
+		    SAVEGAME_SLOT_INFO[MEMORY_CARD_SLOT].valid != 0) {
+			/* A new game over a save: asked like a deletion, No first. */
+			drawString(PC_SAVES_OVERWRITE_QUESTION, 0x18, 0x30);
+			MENU_HIGHLIGHTS[view].pos = 1;
+		} else
+#endif
 		drawString(SLOT_ACTION_QUESTIONS[MAIN_MENU_ACTION], 0x18, 0x30);
 		DrawSync(0);
 		drawString(STR_YES_NO_SPACED, 0, 0xF0);
@@ -3000,6 +3056,14 @@ void drawMainMenuStrings(int32_t menu)
 		}
 		break;
 	case 10:
+#ifdef DW1_NATIVE
+		if (dw1_pc_saves) {
+			drawString(PC_SAVES_ERROR_TITLE, 0, 0);
+			DrawSync(0);
+			drawString(MEMORY_CARD_ERROR_MESSAGES[MEMORY_CARD_ERROR], 0, 0xC);
+			break;
+		}
+#endif
 		drawString(MAIN_D_8013134C, 0, 0);
 		DrawSync(0);
 		if (MEMORY_CARD_ID != 0) {
@@ -3144,7 +3208,11 @@ void drawMainMenuStrings(int32_t menu)
 		strcat(buf, MAIN_D_801346B8);
 		drawString(buf, 0, 0);
 		DrawSync(0);
+#ifdef DW1_NATIVE
+		drawString(dw1_pc_saves ? PC_SAVES_TRAINING : MAIN_D_80131580, 0, 0xC);
+#else
 		drawString(MAIN_D_80131580, 0, 0xC);
+#endif
 		DrawSync(0);
 		drawString(MAIN_D_801315A0, 0, 0x18);
 		break;
@@ -3316,6 +3384,23 @@ void updateMemoryCardState(void)
 	}
 }
 
+#ifdef DW1_NATIVE
+/*
+ * Save slots (dw1_pc_saves): opens the slot list `listMenu` for `action` (MAIN_MENU_ACTION)
+ * straight from the title menu, on the one card. Returns the menu to go to: the list, or the
+ * error screen loadSaveSlotData set up.
+ */
+static int32_t openPcSaveSlots(int32_t action, int32_t listMenu)
+{
+	MAIN_MENU_ACTION = action;
+	MEMORY_CARD_ID = 0;
+	TARGET_MENU = listMenu;
+	SAVE_FILE_NAME[0xF] = 0x3F;
+	loadSaveSlotData(MEMORY_CARD_ID, SAVE_FILE_NAME, SAVEGAME_SLOT_INFO, 0);
+	return TARGET_MENU;
+}
+#endif
+
 void tickMainMenu(void)
 {
 	int32_t view;
@@ -3355,6 +3440,16 @@ void tickMainMenu(void)
 #endif
 		switch (input) {
 		case 1:
+#ifdef DW1_NATIVE
+			if (dw1_pc_saves) {
+				static const int32_t lists[4] = { 0xE, 0x17, 0x21, 0x34 };
+				static const int32_t actions[4] = { 0, 1, 2, 5 };
+
+				VS_PLAYER_INDEX = 0;
+				TARGET_MENU = openPcSaveSlots(actions[cursor->pos], lists[cursor->pos]);
+				break;
+			}
+#endif
 			switch (cursor->pos) {
 			case 0:
 				TARGET_MENU = 0xA;
@@ -3525,6 +3620,13 @@ void tickMainMenu(void)
 		slot = cursor->pos + cursor->scroll;
 		if (input != 2) {
 			if (input == 1) {
+#ifdef DW1_NATIVE
+				if (dw1_pc_saves) {
+					/* Any slot: a used one asks before the new game replaces its save. */
+					TARGET_MENU = 0xF;
+					MEMORY_CARD_SLOT = slot;
+				} else
+#endif
 				if (SAVEGAME_SLOT_INFO[slot].valid == 0) {
 					TARGET_MENU = 0xF;
 					MEMORY_CARD_SLOT = slot;
@@ -3532,6 +3634,11 @@ void tickMainMenu(void)
 			}
 		} else {
 			TARGET_MENU = 0xA;
+#ifdef DW1_NATIVE
+			if (dw1_pc_saves) {
+				TARGET_MENU = 0;
+			}
+#endif
 		}
 		TARGET_MENU = getMenuOnCardChange(0);
 		break;
@@ -3570,6 +3677,16 @@ void tickMainMenu(void)
 				TARGET_MENU = 1;
 				MEMORY_CARD_RETURN_MENU = 0xC;
 				break;
+#ifdef DW1_NATIVE
+			case 6:
+				if (dw1_pc_saves) {
+					/* The slot's file is there already: the new game is written over it. */
+					TARGET_MENU = 0x11;
+				} else {
+					setMemoryCardReadError(status, 0);
+				}
+				break;
+#endif
 			default:
 				setMemoryCardReadError(status, 0);
 				break;
@@ -3721,6 +3838,11 @@ void tickMainMenu(void)
 			}
 		} else {
 			TARGET_MENU = 0x14;
+#ifdef DW1_NATIVE
+			if (dw1_pc_saves) {
+				TARGET_MENU = 0;
+			}
+#endif
 		}
 		TARGET_MENU = getMenuOnCardChange(0);
 		break;
@@ -3842,6 +3964,11 @@ void tickMainMenu(void)
 			}
 		} else {
 			TARGET_MENU = 0x1E;
+#ifdef DW1_NATIVE
+			if (dw1_pc_saves) {
+				TARGET_MENU = 0;
+			}
+#endif
 		}
 		TARGET_MENU = getMenuOnCardChange(0);
 		break;
@@ -3872,6 +3999,11 @@ void tickMainMenu(void)
 			if (status == 0) {
 				TARGET_MENU = 0x1F;
 				MEMORY_CARD_OPERATION = 0;
+#ifdef DW1_NATIVE
+				if (dw1_pc_saves) {
+					TARGET_MENU = openPcSaveSlots(2, 0x21);
+				}
+#endif
 			} else {
 				setMemoryCardReadError(status, 0);
 			}
@@ -4120,6 +4252,11 @@ void tickMainMenu(void)
 			}
 		} else {
 			TARGET_MENU = 0x32;
+#ifdef DW1_NATIVE
+			if (dw1_pc_saves) {
+				TARGET_MENU = VS_RETURN_MENU;
+			}
+#endif
 		}
 		TARGET_MENU = getMenuOnCardChange(0x32);
 		break;
@@ -4182,6 +4319,12 @@ void tickMainMenu(void)
 		if (VS_PLAYER_INDEX == 0) {
 			VS_PLAYER_INDEX = 1;
 			TARGET_MENU = 0x32;
+#ifdef DW1_NATIVE
+			if (dw1_pc_saves) {
+				/* Player 2 picks from the same slots. */
+				TARGET_MENU = 0x34;
+			}
+#endif
 		} else {
 			TARGET_MENU = 0x38;
 		}
@@ -4731,6 +4874,12 @@ int32_t getMenuOnCardChange(int32_t menu)
 
 void setMemoryCardReadError(int32_t id, int32_t returnMenu)
 {
+#ifdef DW1_NATIVE
+	if (dw1_pc_saves && returnMenu == 0x32) {
+		/* Battle Mode's card prompt isn't used: back to the slot list. */
+		returnMenu = 0x34;
+	}
+#endif
 	TARGET_MENU = 3;
 	MEMORY_CARD_ERROR = id;
 	MEMORY_CARD_RETURN_MENU = returnMenu;
@@ -5327,6 +5476,44 @@ void gameClearSave(void)
 		TARGET_MENU = -1;
 	}
 }
+
+#ifdef DW1_NATIVE
+/*
+ * The card file (0x2000 bytes) the game writes for save `payload` in slot `slot` (0-14), built
+ * as the save steps in tickMainMenu build it. The Mac app's save files keep only the save
+ * (crates/dw1/src/saves.rs); this turns one back into what the game reads, or what an
+ * emulator's memory card holds. Bytes past the SaveFile are zero (the game writes whatever
+ * follows SAVE_FILE in memory), and so is any title text the game would have left from an
+ * earlier save in SAVE_FILE.
+ */
+void dw1_card_file_from_save(const SavegamePayload *payload, int32_t slot, uint8_t *out)
+{
+	SaveFile *file = (SaveFile *)out;
+
+	_Static_assert(sizeof(SaveFile) <= 0x2000, "a save file fits its card block");
+	memset(out, 0, 0x2000);
+	file->id[0] = 0x53;
+	file->id[1] = 0x43;
+	file->iconDisplayFlag = 0x13;
+	file->blockNumber = 1;
+	memcpy(file->iconClut, SAVE_ICON_CLUT, 0x20);
+	memcpy(file->iconFrames[0], SAVE_ICON_FRAMES[0], 0x80);
+	memcpy(file->iconFrames[1], SAVE_ICON_FRAMES[1], 0x80);
+	memcpy(file->iconFrames[2], SAVE_ICON_FRAMES[2], 0x80);
+	asciiToShiftJIS((uint8_t *)MAIN_D_8013392C, (uint16_t *)file->title);
+	_strncpy(file->title + 8, SAVEGAME_ID_LABEL[slot + 1], 4);
+	_strncpy(file->title + 0xe, (char *)payload->playerName, 0xD);
+	if ((uint32_t)payload->partnerType < NUM_DIGIMON) {
+		_strncpy(file->title + 0x1c, DIGIMON_NAME(payload->partnerType), 0x11);
+	}
+	memcpy(file->reserved, SAVE_TITLE_RESERVED, 0x1C);
+	file->saves[0] = *payload;
+	file->saves[1] = *payload;
+}
+
+/* sizeof(SavegamePayload), for the app's save files. */
+const int32_t dw1_save_payload_size = sizeof(SavegamePayload);
+#endif
 
 int32_t scriptTickMainMenu(void)
 {
