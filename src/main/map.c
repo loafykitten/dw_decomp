@@ -4402,7 +4402,12 @@ void uploadMapTileImages(MapTileData *tiles, int16_t index)
 	int16_t count;
 	int32_t i;
 
+#ifdef DW1_NATIVE
+	/* MapTiles.width: the PS1 offset 0x1bb8 assumes 4-byte pointers in MapTileData. */
+	count = stride = MAP_TILE_DATA.width;
+#else
 	count = stride = *(int8_t *)((int8_t *)tiles + 0x1bb8);
+#endif
 	if (stride > 3) {
 		count = 4;
 	}
