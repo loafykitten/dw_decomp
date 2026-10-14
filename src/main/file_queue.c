@@ -247,6 +247,11 @@ int32_t addFileReadRequest(char *path, uint8_t *buffer, uint8_t *isRunning,
 	slot->targetBuffer = buffer;
 	slot->finishCallback = callback;
 	slot->finishCallbackParam = callbackParam;
+#ifdef DW1_NATIVE
+	/* addFileReadRequestPath passes no position (size -1: the queue looks the file up and
+	 * overwrites pos before using it); the PS1 copied four bytes from address 0. */
+	if (loc != NULL)
+#endif
 	slot->pos = *loc;
 	slot->size = size;
 

@@ -398,6 +398,10 @@ void loadDynamicLibrary(Overlay lib, uint8_t *isComplete, uint8_t isAsync,
 {
 	uint8_t *nv;
 
+#ifdef DW1_NATIVE
+	/* The overlay's C is linked in: reset its initialised data as the file's load would. */
+	dw1_overlay_reset(lib);
+#endif
 	if (!isAsync) {
 		readFile(REL_BIN_FILES[lib - 1], (nv = REL_BIN_OFFSETS[lib - 1]));
 	} else {

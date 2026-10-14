@@ -24,7 +24,7 @@ typedef struct {
 } EabHudState;
 
 extern GsRVIEW2 GS_VIEWPOINT;
-extern int32_t *EFE_DATA_STACK;
+extern intptr_t *EFE_DATA_STACK;
 
 void setMapLayerEnabled(int32_t enabled);
 int32_t lerp(int32_t start, int32_t end, int32_t t0, int32_t t1, int32_t t);

@@ -41,4 +41,26 @@ typedef unsigned int uintptr_t;
 #define DW1_TMD_ADDR(field) (field)
 #endif
 
+/*
+ * An array index the game computes as (uint32_t)(n) where n can be negative: with 32-bit
+ * pointers the address wraps and reads n elements before the base. With 64-bit pointers that
+ * takes a signed index.
+ */
+/*
+ * A struct's size the game C spells as a literal (a stride, an array's byte size). Structs that
+ * hold pointers are bigger natively, so the native build takes sizeof; everywhere else it's the
+ * literal, so the PS1 builds don't change.
+ */
+#ifdef DW1_NATIVE
+#define DW1_SIZEOF(expr, ps1) ((int32_t)sizeof(expr))
+#else
+#define DW1_SIZEOF(expr, ps1) (ps1)
+#endif
+
+#ifdef DW1_NATIVE
+#define DW1_WRAP_INDEX(n) ((int32_t)(n))
+#else
+#define DW1_WRAP_INDEX(n) ((uint32_t)(n))
+#endif
+
 #endif

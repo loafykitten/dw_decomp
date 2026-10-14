@@ -255,7 +255,7 @@ char MAIN_D_80134220[] = ";1";
 
 EfeFlashData *EFE_FLASH_DATA;
 int32_t FLASH_INSTANCE;
-int32_t *EFE_DATA_STACK;
+intptr_t *EFE_DATA_STACK;
 EfeParticleEffect *EFE_PARTICLE_EMITTERS;
 int32_t EFE_SUB_EFFECT_INDEX;
 long COMBAT_EFFECT_ITR;
@@ -266,12 +266,12 @@ int32_t EFE_ACTIVE_SECTION;
 EfeSubEffect *EFE_SCRIPT_CONTEXT;
 int32_t EFE_SCRIPT_REGISTER;
 EfeBoneOffset *EFE_BONE_OFFSET;
-int32_t EFE_PREVIOUS_DATA_SEGMENT;
+intptr_t EFE_PREVIOUS_DATA_SEGMENT;
 EfeInstance *EFE_CURRENT_DATA_SEGMENT;
-int32_t *EFE_CALL_STACK;
+intptr_t *EFE_CALL_STACK;
 int16_t *EFE_SCRIPT_PTR;
 int16_t EFE_SCRIPT_CURRENT_VALUE;
-int32_t EFE_SCRIPT_HEAD;
+intptr_t EFE_SCRIPT_HEAD;
 EfeSlot *EFE_DATA_ITERATOR;
 EfeSlot *EFE_DATA_PTR;
 char *EFE_HEAP_POINTER;
@@ -311,12 +311,12 @@ CloudFXEntry CLOUD_FX_DATA[60];
 u_long SOME_IMAGE_DATA[896];
 #endif
 int16_t EFE_LOADED_MOVE_DATA[17];
-int32_t EFE_SCRIPT_MEM1_DATA[32];
+intptr_t EFE_SCRIPT_MEM1_DATA[32];
 int16_t UNUSED_EFE_ARRAY[16];
 EfeSound EFE_SOUND_DATA[10];
 EfeLoad EFE_LOAD_REQUEST;
 GsRVIEW2 EFE_FIXED_VIEW;
-int32_t EFE_CALL_STACK_BUFFER[16];
+intptr_t EFE_CALL_STACK_BUFFER[16];
 
 static void *efe_bss_order[] = {
 #if VERSION_IS(EU)
@@ -359,7 +359,7 @@ void initializeParticleFX(void)
 	SVECTOR vec;
 	MATRIX m;
 
-	setInt16WithStride(&PARTICLE_FX_DATA[0].state, -1, 4, 0x34);
+	setInt16WithStride(&PARTICLE_FX_DATA[0].state, -1, 4, DW1_SIZEOF(PARTICLE_FX_DATA[0], 0x34));
 	for (i = 0; i < 0x32; i++) {
 		ang.vx = (((rand() & 0x7F) - 0x40) << 12) / 64;
 		ang.vy = (((rand() & 0x7F) - 0x40) << 12) / 64;
@@ -637,7 +637,7 @@ int32_t addEntityParticleFX(Entity *owner, int32_t timer)
 
 void initializeEntityParticleFX(void)
 {
-	setInt16WithStride(&ENTITY_PARTICLE_FX_DATA[0].timer, -1, 0x14, 0xC);
+	setInt16WithStride(&ENTITY_PARTICLE_FX_DATA[0].timer, -1, 0x14, DW1_SIZEOF(ENTITY_PARTICLE_FX_DATA[0], 0xC));
 }
 
 void tickEntityParticleFX(int32_t id)
@@ -1290,3 +1290,77 @@ void renderParticleFlash(ParticleFlashData *params)
 
 	GsSetWorkBase((PACKET *)prim);
 }
+
+#ifdef DW1_NATIVE
+/*
+ * EfeSubEffect (seven pointers) and EfeUvAnim (two) live inside the loaded EFE file on the PS1,
+ * at base + hdr.subEffects and base + hdr.uvAnims, in 28- and 32-byte records. Natively they are
+ * 56 and 40 bytes and would overrun those regions, so each of the 16 EFE slots keeps native arrays
+ * instead, reused by every load into that slot (BTL, STD and VS never run at once). As on the PS1
+ * the loader then writes inst = NULL and the UV records' unk0 and numKeyframes; the rest starts
+ * as the PS1's would where it can: a UV record's twelve halfwords are the file's bytes, every
+ * pointer is null (the PS1's were file bytes too, never read before being set) but for the
+ * emptiness of spare sub-effect records (dw1EfeSubEffects).
+ */
+#define DW1_EFE_SLOTS 16
+/* Measured over the US disc's ETCHI\EFEDAT.EFE (121 effects, 2026-10-14): at most 149
+ * sub-effect records (War Cry, effect 0x12A; every effect's record region is exactly its
+ * numSubEffects) and 19 TMD objects, one UV-animation record each. */
+#define DW1_EFE_MAX_SUB_EFFECTS 160
+#define DW1_EFE_MAX_UV_ANIMS 32
+static EfeSubEffect dw1_efe_sub_effects[DW1_EFE_SLOTS][DW1_EFE_MAX_SUB_EFFECTS];
+static EfeUvAnim dw1_efe_uv_anims[DW1_EFE_SLOTS][DW1_EFE_MAX_UV_ANIMS];
+
+static void dw1EfeCheck(int32_t slot, int32_t count, int32_t max)
+{
+	if (slot < 0 || slot >= DW1_EFE_SLOTS || count < 0 || count > max) {
+		dw1_native_fatal("EFE slot or record count outside the native side tables");
+	}
+}
+
+EfeSubEffect *dw1EfeSubEffects(int32_t slot, int32_t count, const void *file, const void *fileEnd,
+				EfeSubEffect **end)
+{
+	int32_t i;
+	int32_t n;
+	uint32_t word;
+	EfeSubEffect *a;
+
+	/* The PS1's records run from the file's subEffects offset up to the model (the search for a
+	 * free record in *_spawnEFESubEffect stops there), which can be more than numSubEffects:
+	 * the native table holds as many, and those past numSubEffects take their inst word's
+	 * emptiness from the file, as the PS1's did. A slot without a model (fileEnd NULL) has just
+	 * numSubEffects; the spawners stop the program if they'd search past them (the PS1 would
+	 * have searched on through the file's bytes). */
+	n = count;
+	if (fileEnd != NULL && (const uint8_t *)fileEnd > (const uint8_t *)file) {
+		n = (int32_t)(((const uint8_t *)fileEnd - (const uint8_t *)file + 27) / 28);
+		if (n < count) {
+			n = count;
+		}
+	}
+	dw1EfeCheck(slot, n, DW1_EFE_MAX_SUB_EFFECTS);
+	a = dw1_efe_sub_effects[slot];
+	memset(a, 0, sizeof(dw1_efe_sub_effects[slot]));
+	for (i = count; i < n; i++) {
+		memcpy(&word, (const uint8_t *)file + 28 * i, 4);
+		a[i].inst = word != 0 ? (int16_t *)(uintptr_t)word : NULL;
+	}
+	*end = a + n;
+	return a;
+}
+
+EfeUvAnim *dw1EfeUvAnims(int32_t slot, const void *file, int32_t count)
+{
+	int32_t i;
+	EfeUvAnim *a;
+
+	dw1EfeCheck(slot, count, DW1_EFE_MAX_UV_ANIMS);
+	a = dw1_efe_uv_anims[slot];
+	memset(a, 0, sizeof(dw1_efe_uv_anims[slot]));
+	for (i = 0; i < count; i++) {
+		memcpy(&a[i], (const uint8_t *)file + 32 * i, 24);
+	}
+	return a;
+}
+#endif

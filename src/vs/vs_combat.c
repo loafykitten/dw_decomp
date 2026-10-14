@@ -1575,7 +1575,7 @@ void VS__tickDigimonAttacking(Entity *entity, DigimonEntity *target,
 			for (i = 0; i <= ENEMY_COUNT; ++i) {
 				if (i != fighterId) {
 					other = ENTITY_TABLE[COMBAT_DATA_PTR->player.entityIds[i]];
-					if (DIGIMON_DATA[other->type].moves[(uint32_t)(other->anim.animId - 0x2e)] == 0x2d) {
+					if (DIGIMON_DATA[other->type].moves[DW1_WRAP_INDEX(other->anim.animId - 0x2e)] == 0x2d) {
 						if (fighterId == COMBAT_DATA_PTR->fighter[i].targetId) {
 							return;
 						}

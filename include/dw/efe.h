@@ -12,7 +12,7 @@
 #include <dw/version.h>
 
 #define EFE_POP(ptr, type) ((type)*--(ptr))
-#define EFE_PUSH(ptr, type, value) (*(ptr)++ = (int32_t)(type)(value))
+#define EFE_PUSH(ptr, type, value) (*(ptr)++ = (intptr_t)(type)(value))
 
 #define EFE_POP1(type) EFE_POP(EFE_DATA_STACK, type)
 #define EFE_PUSH1(type, value) EFE_PUSH(EFE_DATA_STACK, type, value)
@@ -172,7 +172,7 @@ typedef struct {
 typedef struct {
 	int32_t effectId;
 	int16_t *initScript;
-	int32_t data;
+	intptr_t data;
 	int16_t *startScript;
 	EfeSubEffect *subEffects;
 	int16_t numSubEffects;
@@ -181,6 +181,10 @@ typedef struct {
 	int32_t numObjects;
 	EfeUvAnim *uvAnims;
 	EfeUvAnim *uvAnimsEnd;
+#ifdef DW1_NATIVE
+	/* The end of the native sub-effect records (efe.c); the PS1 stopped at model->modelPtr. */
+	EfeSubEffect *subEffectsEnd;
+#endif
 } EfeSlot;
 
 typedef struct {
@@ -331,11 +335,17 @@ void removeAllParticleFX(void);
 void removeEFEFlash(int32_t id);
 #endif
 CdlLOC *getEFEDATEntry(int32_t id);
-extern int32_t *EFE_DATA_STACK;
-extern int32_t EFE_SCRIPT_MEM1_DATA[];
+#ifdef DW1_NATIVE
+/* Native homes for an EFE slot's sub-effect and UV-animation records (efe.c). */
+EfeSubEffect *dw1EfeSubEffects(int32_t slot, int32_t count, const void *file, const void *fileEnd,
+				EfeSubEffect **end);
+EfeUvAnim *dw1EfeUvAnims(int32_t slot, const void *file, int32_t count);
+#endif
+extern intptr_t *EFE_DATA_STACK;
+extern intptr_t EFE_SCRIPT_MEM1_DATA[];
 extern int16_t EFE_LOADED_MOVE_DATA[];
 extern EfeInstance *EFE_CURRENT_DATA_SEGMENT;
-extern int32_t EFE_PREVIOUS_DATA_SEGMENT;
+extern intptr_t EFE_PREVIOUS_DATA_SEGMENT;
 
 extern EfeParticleEffect *EFE_PARTICLE_EMITTERS;
 extern int32_t EFE_SUB_EFFECT_INDEX;
@@ -346,10 +356,10 @@ extern int32_t EFE_ACTIVE_SECTION;
 extern EfeSubEffect *EFE_SCRIPT_CONTEXT;
 extern int32_t EFE_SCRIPT_REGISTER;
 extern EfeBoneOffset *EFE_BONE_OFFSET;
-extern int32_t *EFE_CALL_STACK;
+extern intptr_t *EFE_CALL_STACK;
 extern int16_t *EFE_SCRIPT_PTR;
 extern int16_t EFE_SCRIPT_CURRENT_VALUE;
-extern int32_t EFE_SCRIPT_HEAD;
+extern intptr_t EFE_SCRIPT_HEAD;
 extern EfeSlot *EFE_DATA_ITERATOR;
 extern EfeSlot *EFE_DATA_PTR;
 extern char *EFE_HEAP_POINTER;
@@ -358,6 +368,6 @@ extern int16_t UNUSED_EFE_ARRAY[];
 extern EfeLoad EFE_LOAD_REQUEST;
 extern EfeSound EFE_SOUND_DATA[10];
 extern GsRVIEW2 EFE_FIXED_VIEW;
-extern int32_t EFE_CALL_STACK_BUFFER[16];
+extern intptr_t EFE_CALL_STACK_BUFFER[16];
 
 #endif

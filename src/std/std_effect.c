@@ -201,30 +201,30 @@ void STD_loadEFEIndexedVariable(void);
 void STD_loadEFERandomValue(void);
 void STD_loadEFEVariable(void);
 void STD_loadEFEImmediate(void);
-int32_t STD_shiftRightInt32Variable(int32_t p);
-int32_t STD_shiftLeftInt32Variable(int32_t p);
-int32_t STD_moduloInt32Variable(int32_t p);
-int32_t STD_divideInt32Variable(int32_t p);
-int32_t STD_multiplyInt32Variable(int32_t p);
-int32_t STD_subtractInt32Variable(int32_t p);
-int32_t STD_addInt32Variable(int32_t p);
-int32_t STD_setInt32Variable(int32_t p);
-int32_t STD_shiftRightInt8Variable(int32_t p);
-int32_t STD_shiftLeftInt8Variable(int32_t p);
-int32_t STD_moduloInt8Variable(int32_t p);
-int32_t STD_divideInt8Variable(int32_t p);
-int32_t STD_multiplyInt8Variable(int32_t p);
-int32_t STD_subtractInt8Variable(int32_t p);
-int32_t STD_addInt8Variable(int32_t p);
-int32_t STD_setInt8Variable(int32_t p);
-int32_t STD_shiftRightInt16Variable(int32_t p);
-int32_t STD_shiftLeftInt16Variable(int32_t p);
-int32_t STD_moduloInt16Variable(int32_t p);
-int32_t STD_divideInt16Variable(int32_t p);
-int32_t STD_multiplyInt16Variable(int32_t p);
-int32_t STD_subtractInt16Variable(int32_t p);
-int32_t STD_addInt16Variable(int32_t p);
-int32_t STD_setInt16Variable(int32_t p);
+int32_t STD_shiftRightInt32Variable(intptr_t p);
+int32_t STD_shiftLeftInt32Variable(intptr_t p);
+int32_t STD_moduloInt32Variable(intptr_t p);
+int32_t STD_divideInt32Variable(intptr_t p);
+int32_t STD_multiplyInt32Variable(intptr_t p);
+int32_t STD_subtractInt32Variable(intptr_t p);
+int32_t STD_addInt32Variable(intptr_t p);
+int32_t STD_setInt32Variable(intptr_t p);
+int32_t STD_shiftRightInt8Variable(intptr_t p);
+int32_t STD_shiftLeftInt8Variable(intptr_t p);
+int32_t STD_moduloInt8Variable(intptr_t p);
+int32_t STD_divideInt8Variable(intptr_t p);
+int32_t STD_multiplyInt8Variable(intptr_t p);
+int32_t STD_subtractInt8Variable(intptr_t p);
+int32_t STD_addInt8Variable(intptr_t p);
+int32_t STD_setInt8Variable(intptr_t p);
+int32_t STD_shiftRightInt16Variable(intptr_t p);
+int32_t STD_shiftLeftInt16Variable(intptr_t p);
+int32_t STD_moduloInt16Variable(intptr_t p);
+int32_t STD_divideInt16Variable(intptr_t p);
+int32_t STD_multiplyInt16Variable(intptr_t p);
+int32_t STD_subtractInt16Variable(intptr_t p);
+int32_t STD_addInt16Variable(intptr_t p);
+int32_t STD_setInt16Variable(intptr_t p);
 int32_t STD_compareGreaterOrEqual(int32_t x);
 int32_t STD_compareGreater(int32_t x);
 int32_t STD_compareLessOrEqual(int32_t x);
@@ -235,7 +235,7 @@ int16_t STD_calculateAttackHitPosition(SVECTOR *out, Entity *self, Entity *other
 int32_t STD_interpolateClamped(int32_t lo, int32_t hi, long t, int32_t start, int32_t end);
 void STD_initializeEFESubOpcodeTable(void);
 void STD_dispatchEFEOpcode(int32_t op);
-int32_t STD_runEFEScript(int32_t script);
+int32_t STD_runEFEScript(intptr_t script);
 void STD_resetPoisonBubbles(void);
 int32_t STD_addPoisonBubble(Entity *entity);
 void STD_tickPoisonBubble(int32_t i);
@@ -260,7 +260,7 @@ void STD_renderStunSubEffect(int32_t i);
 int32_t STD_addStunEffect(Entity *entity, int32_t val);
 void STD_removeStunEffect(int32_t i, Entity *entity);
 void STD_removeAllStunEffects(void);
-void STD_setTMDObjectColor(int32_t idx, VECTOR *color, int32_t base);
+void STD_setTMDObjectColor(int32_t idx, VECTOR *color, intptr_t base);
 void STD_tickFinisherAura(int32_t i);
 void STD_renderFinisherAuraSpark(VECTOR *pos, int32_t scale, SVECTOR *dir, uint8_t *col);
 void STD_initializeFinisherAuraModel(char *tim, char *base);
@@ -784,9 +784,9 @@ int32_t STD_EFE_LOAD_STATE;
 int32_t STD_EFE_LOAD_SLOT;
 int32_t STD_SAVED_DRAWING_OFFSET_X;
 int32_t STD_SAVED_DRAWING_OFFSET_Y;
-int32_t STD_CONFUSION_FX_MODEL;
+intptr_t STD_CONFUSION_FX_MODEL;
 char *STD_STUN_FX_MODEL;
-int32_t STD_FINISHER_AURA_MODEL;
+intptr_t STD_FINISHER_AURA_MODEL;
 EfeAura *STD_FLAT_BULLET_PTR;
 
 static void *std_effect_sbss_order[] = {
@@ -927,7 +927,7 @@ void (*STD_jtbl_8007AE20[18])(void) = {
 	STD_spawnEFESubEffect,
 };
 
-int32_t (*STD_EFE_VARIABLE_OPERATORS[5][8])() = {
+int32_t (*STD_EFE_VARIABLE_OPERATORS[5][8])(intptr_t) = {
 	STD_setInt8Variable,
 	STD_addInt8Variable,
 	STD_subtractInt8Variable,
@@ -1608,7 +1608,11 @@ char *STD_initializeParticleEmitters(char *base)
 		EFE_PARTICLE_EMITTERS[i].transform = NULL;
 	}
 
+#ifdef DW1_NATIVE
+	return base + 21 * sizeof(EfeParticleEffect);
+#else
 	return base + 0x23c4;
+#endif
 }
 
 void STD_tickEFEEngine(void)
@@ -1903,13 +1907,22 @@ int32_t STD_setupLoadedEFEFile(EfeLoad *load)
 			EFE_DATA_ITERATOR->numObjects = tmdp[2];
 		}
 		EFE_DATA_ITERATOR->numSubEffects = hdr.numSubEffects;
+#ifdef DW1_NATIVE
+		EFE_DATA_ITERATOR->subEffects = dw1EfeSubEffects(idx, hdr.numSubEffects, base + hdr.subEffects,
+								   m->modelPtr, &EFE_DATA_ITERATOR->subEffectsEnd);
+#else
 		EFE_DATA_ITERATOR->subEffects = (EfeSubEffect *)((uintptr_t)base + hdr.subEffects);
+#endif
 		for (j = 0; j < hdr.numSubEffects; j++) {
 			EFE_DATA_ITERATOR->subEffects[j].inst = NULL;
 		}
 		n = EFE_DATA_ITERATOR->numObjects;
 		if (n != 0) {
+#ifdef DW1_NATIVE
+			EFE_DATA_ITERATOR->uvAnims = dw1EfeUvAnims(idx, base + hdr.uvAnims, n);
+#else
 			EFE_DATA_ITERATOR->uvAnims = (EfeUvAnim *)((uintptr_t)base + hdr.uvAnims);
+#endif
 			for (j = 0; j < n; j++) {
 				EFE_DATA_ITERATOR->uvAnims[j].unk0 = 0;
 				EFE_DATA_ITERATOR->uvAnims[j].numKeyframes = 0;
@@ -1918,7 +1931,12 @@ int32_t STD_setupLoadedEFEFile(EfeLoad *load)
 		EFE_DATA_ITERATOR->effectId = hdr.effectId;
 		EFE_DATA_ITERATOR->startScript = (int16_t *)((intptr_t)base + hdr.startScript);
 		EFE_DATA_ITERATOR->initScript = (int16_t *)((intptr_t)base + hdr.initScript);
+#ifdef DW1_NATIVE
+		/* Never read; natively it ends the native array. */
+		EFE_DATA_ITERATOR->uvAnimsEnd = EFE_DATA_ITERATOR->uvAnims + EFE_DATA_ITERATOR->numObjects;
+#else
 		EFE_DATA_ITERATOR->uvAnimsEnd = (EfeUvAnim *)((intptr_t)base + hdr.uvAnimsEnd);
+#endif
 		EFE_CURRENT_DATA_SEGMENT = NULL;
 		EFE_SCRIPT_HEAD = EFE_DATA_ITERATOR->data;
 		EFE_SCRIPT_CONTEXT = EFE_DATA_ITERATOR->subEffects;
@@ -2235,7 +2253,11 @@ char *STD_initializeEFEEngine(char *base)
 		EFE_DATA_PTR[i].numObjects = 0;
 	}
 
+#ifdef DW1_NATIVE
+	base = (char *)((intptr_t)base + 0x10 * sizeof(EfeSlot));
+#else
 	base = (char *)((intptr_t)base + 0x280);
+#endif
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
 	base = STD_initializeParticleEmitters(base);
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
@@ -2303,6 +2325,11 @@ int32_t STD_startEFE(int32_t i)
 
 	UNUSED_EFE_ARRAY[i] = -1;
 	STD_runEFESlotScript(i);
+#ifdef DW1_NATIVE
+	/* No return statement: on the PS1 the caller gets v0 as STD_runEFEScript left it (the slot
+	 * script's EFE_ACTIVE_SECTION), STD_runEFESlotScript being void and the last call. */
+	return EFE_ACTIVE_SECTION;
+#endif
 }
 
 void STD_stopEFESubEffect(int32_t a, int32_t b)
@@ -2316,6 +2343,13 @@ void STD_stopEFESubEffect(int32_t a, int32_t b)
 
 	EFE_SCRIPT_CONTEXT = &EFE_DATA_PTR[a].subEffects[b];
 	EFE_SCRIPT_CONTEXT->inst = NULL;
+#ifdef DW1_NATIVE
+	/* A sub-effect that never started has no instance: the PS1 wrote -1 through the record's
+	 * unset pointer into low RAM. */
+	if (EFE_SCRIPT_CONTEXT->instance == NULL) {
+		return;
+	}
+#endif
 	EFE_SCRIPT_CONTEXT->instance->frame = -1;
 }
 
@@ -2976,7 +3010,7 @@ void STD_selectRandomTargetEntity(void)
 	int32_t excludeSelf;
 	int32_t n;
 
-	excludeSelf = *--EFE_DATA_STACK;
+	excludeSelf = EFE_POP1(int32_t);
 	for (n = rand() % 8; n >= 0; n--) {
 		EFE_TARGET_ENTITY_INDEX++;
 		while (1) {
@@ -3292,10 +3326,10 @@ void STD_renderWireframeGrid(void)
 
 void STD_render2DTexturedQuad(void)
 {
-	int32_t a;
-	int32_t b;
-	int32_t c;
-	int32_t d;
+	intptr_t a;
+	intptr_t b;
+	intptr_t c;
+	intptr_t d;
 	int32_t depth;
 	EfeColor *col;
 	int32_t u0off;
@@ -3315,10 +3349,10 @@ void STD_render2DTexturedQuad(void)
 	u0off = EFE_POP1(int32_t);
 	col = EFE_POP1(EfeColor *);
 	depth = EFE_POP1(int32_t);
-	d = EFE_POP1(int32_t);
-	c = EFE_POP1(int32_t);
-	b = EFE_POP1(int32_t);
-	a = EFE_POP1(int32_t);
+	d = EFE_POP1(intptr_t);
+	c = EFE_POP1(intptr_t);
+	b = EFE_POP1(intptr_t);
+	a = EFE_POP1(intptr_t);
 
 	if ((depth > 0x20) && (depth < 0x1000)) {
 		m = EFE_DATA_ITERATOR->model;
@@ -3418,13 +3452,13 @@ void STD_getSourceBoneTransform(void)
 void STD_copyToParentTransform(void)
 {
 	int32_t *dst;
-	int32_t src;
+	intptr_t src;
 	int32_t off;
 	int32_t size;
 
 	size = EFE_POP1(int32_t);
 	off = EFE_POP1(int32_t);
-	src = EFE_POP1(int32_t);
+	src = EFE_POP1(intptr_t);
 	dst = (int32_t *)(EFE_PREVIOUS_DATA_SEGMENT + off);
 	switch (size) {
 	case 0xc:
@@ -3537,11 +3571,23 @@ void STD_getTargetBoneTransform(void)
 	rotOut = EFE_POP1(EfeVector *);
 	posOut = EFE_POP1(EfeVector *);
 	idx = EFE_POP1(int32_t);
+#ifdef DW1_NATIVE
+	{
+		PositionData *pd = EFE_SCRIPT_CONTEXT->targetEntity->posData;
+
+		matrix = &pd->posMatrix;
+		coord = &pd[idx].posMatrix;
+		RotMatrix(&pd->rotation, &matrix->coord);
+		ScaleMatrix(&matrix->coord, &pd->scale);
+		TransMatrix(&matrix->coord, &pd->location);
+	}
+#else
 	matrix = (GsCOORDINATE2 *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x10);
 	coord = (GsCOORDINATE2 *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + (idx * 136) + 0x10);
 	RotMatrix((SVECTOR *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x70), &matrix->coord);
 	ScaleMatrix(&matrix->coord, (VECTOR *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x60));
 	TransMatrix(&matrix->coord, (VECTOR *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x78));
+#endif
 	calculatePosition(coord, &m);
 	matrixToEuler2(&m, &rot);
 	copyVector(rotOut, &rot);
@@ -4224,13 +4270,13 @@ void STD_addSourceEntityParticleFX(void)
 void STD_copyFromParentTransform(void)
 {
 	int32_t *src;
-	int32_t dst;
+	intptr_t dst;
 	int32_t off;
 	int32_t size;
 
 	size = EFE_POP1(int32_t);
 	off = EFE_POP1(int32_t);
-	dst = EFE_POP1(int32_t);
+	dst = EFE_POP1(intptr_t);
 	src = (int32_t *)(EFE_PREVIOUS_DATA_SEGMENT + off);
 	switch (size) {
 	case 0xc:
@@ -4549,7 +4595,11 @@ void STD_copyTargetEntityPosition(void)
 	int32_t *m;
 
 	out = EFE_POP1(EfeVector *);
+#ifdef DW1_NATIVE
+	m = (int32_t *)&EFE_SCRIPT_CONTEXT->targetEntity->posData->posMatrix.workm;
+#else
 	m = (int32_t *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->targetEntity)[1] + 0x34);
+#endif
 	out->vx = m[5];
 	out->vy = m[6];
 	out->vz = m[7];
@@ -4654,7 +4704,11 @@ void STD_getScatteredSpawnPosition(void)
 	}
 
 	if (EFE_PREVIOUS_DATA_SEGMENT == 0) {
+#ifdef DW1_NATIVE
+		p = (int32_t *)&EFE_SCRIPT_CONTEXT->sourceEntity->posData[*(int16_t *)(intptr_t)EFE_SCRIPT_CONTEXT->boneOffset].posMatrix.workm;
+#else
 		p = (int32_t *)(((char **)(intptr_t)EFE_SCRIPT_CONTEXT->sourceEntity)[1] + (*(int16_t *)(intptr_t)EFE_SCRIPT_CONTEXT->boneOffset * 136) + 0x34);
+#endif
 		out->vx = p[5];
 		out->vy = p[6];
 		out->vz = p[7];
@@ -4760,7 +4814,7 @@ void STD_initializeEFETransform(void)
 		return;
 	}
 
-	src = (int32_t *)((int32_t)EFE_PREVIOUS_DATA_SEGMENT + 4);
+	src = (int32_t *)(EFE_PREVIOUS_DATA_SEGMENT + 4);
 	*dst++ = *src++;
 	*dst++ = *src++;
 	*dst++ = *src++;
@@ -4798,11 +4852,11 @@ void STD_drawTMD(void)
 
 void STD_initializeSubEffectInstructions(void)
 {
-	int32_t b;
-	int32_t a;
+	intptr_t b;
+	intptr_t a;
 
-	a = EFE_POP1(int32_t);
-	b = EFE_POP1(int32_t);
+	a = EFE_POP1(intptr_t);
+	b = EFE_POP1(intptr_t);
 	EFE_CURRENT_DATA_SEGMENT->frame = 0;
 	EFE_SCRIPT_CONTEXT->inst = (int16_t *)b;
 	EFE_SCRIPT_CONTEXT->someInst = (int16_t *)a;
@@ -4812,12 +4866,12 @@ void STD_initializeUVAnim(void)
 {
 	int32_t val;
 	int32_t idx;
-	int32_t ptr;
+	intptr_t ptr;
 	EfeUvAnim *anim;
 	int32_t i;
-	uint32_t q;
+	uintptr_t q;
 
-	ptr = EFE_POP1(int32_t);
+	ptr = EFE_POP1(intptr_t);
 	val = EFE_POP1(int32_t);
 	idx = EFE_POP1(int32_t);
 	if ((idx < 0) || (idx >= EFE_DATA_ITERATOR->numObjects)) {
@@ -4904,7 +4958,16 @@ void STD_spawnEFESubEffect(void)
 			break;
 		}
 		EFE_SCRIPT_CONTEXT++;
+#ifdef DW1_NATIVE
+		if (EFE_SCRIPT_CONTEXT >= EFE_DATA_ITERATOR->subEffectsEnd) {
+			/* Without a model the PS1's bound was NULL, which no KSEG0 address is at or
+			 * past as a signed int: it searched on through the file. Unmodelled. */
+			if (EFE_DATA_ITERATOR->model->modelPtr == NULL) {
+				dw1_native_fatal("EFE sub-effect search past the records of a slot without a model");
+			}
+#else
 		if ((intptr_t)EFE_SCRIPT_CONTEXT >= (intptr_t)EFE_DATA_ITERATOR->model->modelPtr) {
+#endif
 			STD_returnFromEFESubroutine();
 			return;
 		}
@@ -4970,7 +5033,7 @@ void STD_callEFESubroutine(void)
 
 void STD_pushEFEVariableAddress(void)
 {
-	int32_t ip;
+	intptr_t ip;
 
 	ip = (intptr_t)EFE_SCRIPT_PTR;
 
@@ -4987,7 +5050,7 @@ void STD_pushEFEVariableAddress(void)
 void STD_pushEFEVariable(void)
 {
 	int16_t *pc;
-	int32_t p;
+	intptr_t p;
 
 	pc = (int16_t *)(intptr_t)EFE_SCRIPT_PTR;
 	if (pc[2] == 0) {
@@ -5157,122 +5220,122 @@ void STD_loadEFEImmediate(void)
 	EFE_SCRIPT_PTR = (int16_t *)((intptr_t)EFE_SCRIPT_PTR + 6);
 }
 
-int32_t STD_shiftRightInt32Variable(int32_t p)
+int32_t STD_shiftRightInt32Variable(intptr_t p)
 {
 	*(int32_t *)p >>= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_shiftLeftInt32Variable(int32_t p)
+int32_t STD_shiftLeftInt32Variable(intptr_t p)
 {
 	*(int32_t *)p <<= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_moduloInt32Variable(int32_t p)
+int32_t STD_moduloInt32Variable(intptr_t p)
 {
 	*(int32_t *)p %= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_divideInt32Variable(int32_t p)
+int32_t STD_divideInt32Variable(intptr_t p)
 {
 	*(int32_t *)p /= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_multiplyInt32Variable(int32_t p)
+int32_t STD_multiplyInt32Variable(intptr_t p)
 {
 	*(int32_t *)p *= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_subtractInt32Variable(int32_t p)
+int32_t STD_subtractInt32Variable(intptr_t p)
 {
 	*(int32_t *)p -= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_addInt32Variable(int32_t p)
+int32_t STD_addInt32Variable(intptr_t p)
 {
 	*(int32_t *)p += EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_setInt32Variable(int32_t p)
+int32_t STD_setInt32Variable(intptr_t p)
 {
 	*(int32_t *)p = EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_shiftRightInt8Variable(int32_t p)
+int32_t STD_shiftRightInt8Variable(intptr_t p)
 {
 	*(int8_t *)p >>= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_shiftLeftInt8Variable(int32_t p)
+int32_t STD_shiftLeftInt8Variable(intptr_t p)
 {
 	*(int8_t *)p <<= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_moduloInt8Variable(int32_t p)
+int32_t STD_moduloInt8Variable(intptr_t p)
 {
 	*(int8_t *)p %= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_divideInt8Variable(int32_t p)
+int32_t STD_divideInt8Variable(intptr_t p)
 {
 	*(int8_t *)p /= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_multiplyInt8Variable(int32_t p)
+int32_t STD_multiplyInt8Variable(intptr_t p)
 {
 	*(int8_t *)p *= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_subtractInt8Variable(int32_t p)
+int32_t STD_subtractInt8Variable(intptr_t p)
 {
 	*(int8_t *)p -= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_addInt8Variable(int32_t p)
+int32_t STD_addInt8Variable(intptr_t p)
 {
 	*(int8_t *)p += EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_setInt8Variable(int32_t p)
+int32_t STD_setInt8Variable(intptr_t p)
 {
 	*(int8_t *)p = EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_shiftRightInt16Variable(int32_t p)
+int32_t STD_shiftRightInt16Variable(intptr_t p)
 {
 	*(int16_t *)p >>= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_shiftLeftInt16Variable(int32_t p)
+int32_t STD_shiftLeftInt16Variable(intptr_t p)
 {
 	*(int16_t *)p <<= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_moduloInt16Variable(int32_t p)
+int32_t STD_moduloInt16Variable(intptr_t p)
 {
 	*(int16_t *)p %= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_divideInt16Variable(int32_t p)
+int32_t STD_divideInt16Variable(intptr_t p)
 {
 	*(int16_t *)p /= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_multiplyInt16Variable(int32_t p)
+int32_t STD_multiplyInt16Variable(intptr_t p)
 {
 	*(int16_t *)p *= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_subtractInt16Variable(int32_t p)
+int32_t STD_subtractInt16Variable(intptr_t p)
 {
 	*(int16_t *)p -= EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_addInt16Variable(int32_t p)
+int32_t STD_addInt16Variable(intptr_t p)
 {
 	*(int16_t *)p += EFE_SCRIPT_REGISTER;
 }
 
-int32_t STD_setInt16Variable(int32_t p)
+int32_t STD_setInt16Variable(intptr_t p)
 {
 	*(int16_t *)p = EFE_SCRIPT_REGISTER;
 }
@@ -5532,7 +5595,7 @@ void STD_dispatchEFEOpcode(int32_t op)
 	STD_jtbl_8007AE20[op]();
 }
 
-int32_t STD_runEFEScript(int32_t script)
+int32_t STD_runEFEScript(intptr_t script)
 {
 	EFE_SCRIPT_PTR = (int16_t *)script;
 	EFE_DATA_STACK = EFE_SCRIPT_MEM1_DATA;
@@ -5552,7 +5615,7 @@ int32_t STD_runEFEScript(int32_t script)
 
 void STD_resetPoisonBubbles(void)
 {
-	setInt16WithStride(&STD_POISON_BUBBLES[0].frame, -1, 0xc, 0xc);
+	setInt16WithStride(&STD_POISON_BUBBLES[0].frame, -1, 0xc, DW1_SIZEOF(STD_POISON_BUBBLES[0], 0xc));
 }
 
 int32_t STD_addPoisonBubble(Entity *entity)
@@ -5729,7 +5792,7 @@ void STD_initializeConfusionEffect(char *base)
 {
 	STD_CONFUSION_FX_MODEL = (intptr_t)base;
 	GsMapModelingData((unsigned long *)((char *)STD_CONFUSION_FX_MODEL + 4));
-	setInt16WithStride(&STD_CONFUSION_EFFECTS[0].frame, -1, 4, 0x10);
+	setInt16WithStride(&STD_CONFUSION_EFFECTS[0].frame, -1, 4, DW1_SIZEOF(STD_CONFUSION_EFFECTS[0], 0x10));
 }
 
 int32_t STD_addConfusionEffect(Entity *entity)
@@ -6020,7 +6083,7 @@ void STD_removeAllStunEffects(void)
 	}
 }
 
-void STD_setTMDObjectColor(int32_t idx, VECTOR *color, int32_t base)
+void STD_setTMDObjectColor(int32_t idx, VECTOR *color, intptr_t base)
 {
 	struct TMD_STRUCT *obj;
 	TMD_P_TNF4 *prim;
@@ -6028,7 +6091,7 @@ void STD_setTMDObjectColor(int32_t idx, VECTOR *color, int32_t base)
 	int32_t count;
 	uint8_t t;
 
-	obj = (struct TMD_STRUCT *)((uint32_t)base + 0xc);
+	obj = (struct TMD_STRUCT *)((uintptr_t)base + 0xc);
 	obj += idx;
 	count = obj->primn;
 	prim = (TMD_P_TNF4 *)DW1_TMD_ADDR(obj->primtop);
@@ -6320,7 +6383,11 @@ char *STD_initializeAuraProjectiles(char *base)
 
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
 	STD_FLAT_BULLET_PTR = (EfeAura *)base;
+#ifdef DW1_NATIVE
+	base = (char *)((intptr_t)base + 8 * sizeof(EfeAura));
+#else
 	base = (char *)((intptr_t)base + 0x120);
+#endif
 	for (i = 0; i < 8; i++) {
 		STD_FLAT_BULLET_PTR[i].frame = -1;
 	}
