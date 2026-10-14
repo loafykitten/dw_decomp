@@ -220,6 +220,18 @@ DVECTOR DRAW_OFFSET_0 = { 0x00a0, 0x0078 };
 DVECTOR DRAW_OFFSET_1 = { 0x00a0, 0x0168 };
 #endif
 
+#ifdef DW1_NATIVE
+/* sizeof(GsOT) is 32 here (8-byte pointers), not 0x14: the second table goes at +0x20 and the
+ * tag arrays after both. */
+GsOT_TAG *FRAMEBUFFER0_ORIGIN = (GsOT_TAG *)(TEXTURE_BUFFER + 0x40);
+
+GsOT_TAG *FRAMEBUFFER1_ORIGIN = (GsOT_TAG *)(TEXTURE_BUFFER + 0x2040);
+
+GsOT *FRAMEBUFFER_OT[2] = {
+	(GsOT *)TEXTURE_BUFFER,
+	(GsOT *)(TEXTURE_BUFFER + 0x20),
+};
+#else
 GsOT_TAG *FRAMEBUFFER0_ORIGIN = (GsOT_TAG *)(TEXTURE_BUFFER + 0x28);
 
 GsOT_TAG *FRAMEBUFFER1_ORIGIN = (GsOT_TAG *)(TEXTURE_BUFFER + 0x2028);
@@ -228,6 +240,8 @@ GsOT *FRAMEBUFFER_OT[2] = {
 	(GsOT *)TEXTURE_BUFFER,
 	(GsOT *)(TEXTURE_BUFFER + 0x14),
 };
+
+#endif
 
 uint8_t *GENERAL_BUFFER_PTR = GENERAL_BUFFER;
 
