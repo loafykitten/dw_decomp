@@ -1265,6 +1265,11 @@ Entity *getEntityFromScriptId(uint8_t *scriptId)
 			return ENTITY_TABLE[i + 2];
 		}
 	}
+#ifdef DW1_NATIVE
+	/* No entity has the id: the PS1 returned v0 as the caller left it, which differs by
+	 * caller and isn't reconstructed (docs/phase5-returns-audit.md). */
+	dw1_native_fatal("getEntityFromScriptId found no entity (the PS1's result is unmodelled)");
+#endif
 }
 
 void worldPosToScreenPos2(int16_t *x, int16_t *y, int16_t *z)

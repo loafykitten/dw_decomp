@@ -125,17 +125,30 @@ int32_t loadStackedTIMEntry(char *path, void *buffer, int32_t offset,
 {
 	GsIMAGE image;
 	RECT rect;
+#ifdef DW1_NATIVE
+	/* No return statement: the PS1 returned its last LoadImage's result (left in v0). */
+	int32_t lastLoadImage;
+#endif
 
 	readFileSectors(path, buffer, offset, sectors);
 	GsGetTimInfo((u_long *)buffer + 1, &image);
 
 	setRECT(&rect, image.px, image.py, image.pw, image.ph);
+#ifdef DW1_NATIVE
+	lastLoadImage =
+#endif
 	LoadImage(&rect, image.pixel);
 
 	if (((image.pmode >> 3) & 1) != 0) {
 		setRECT(&rect, image.cx, image.cy, image.cw, image.ch);
+#ifdef DW1_NATIVE
+		lastLoadImage =
+#endif
 		LoadImage(&rect, image.clut);
 	}
+#ifdef DW1_NATIVE
+	return lastLoadImage;
+#endif
 }
 
 int32_t readFileSectors(char *path, void *buffer, int32_t offset,

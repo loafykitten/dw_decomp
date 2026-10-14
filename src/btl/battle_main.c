@@ -3581,6 +3581,10 @@ int16_t BTL_calculateElementBonus(int16_t arg0, int16_t arg1)
 	case 2:
 		return 1;
 	}
+#ifdef DW1_NATIVE
+	/* A TYPE_FACTORS entry outside {2, 5, 10, 15, 20}, which the table never holds. */
+	dw1_native_fatal("calculateElementBonus with an unexpected type factor");
+#endif
 }
 
 int32_t BTL_countLivingEnemies(void)

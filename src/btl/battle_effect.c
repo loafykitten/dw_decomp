@@ -1715,6 +1715,10 @@ int32_t BTL_setupLoadedEFEFile(EfeLoad *load)
 	int32_t *tmdp;
 	int32_t ce;
 	int32_t s;
+#ifdef DW1_NATIVE
+	int32_t nativeV0;
+	int32_t nativeV0Known;
+#endif
 
 	ld = ld = load;
 	moves = ld->moves;
@@ -1723,6 +1727,13 @@ int32_t BTL_setupLoadedEFEFile(EfeLoad *load)
 	tim = BTL_getEFETextureSection(data);
 	m->modelPtr = (TMDModel *)(tmd = BTL_getEFEModelSection(data));
 	fileId = BTL_getEFEFileId(data);
+#ifdef DW1_NATIVE
+	/* What the PS1's v0 holds on the paths that fall off the end (no return statement; the
+	 * file queue tests the result): fileId from here, then the last result a call leaves.
+	 * -1 marks a value only Sony's GsGetTimInfo knows (docs/phase5-returns-audit.md). */
+	nativeV0 = fileId;
+	nativeV0Known = 1;
+#endif
 
 	switch (BTL_EFE_LOAD_STATE) {
 	case 0:
@@ -1748,8 +1759,15 @@ int32_t BTL_setupLoadedEFEFile(EfeLoad *load)
 		GsGetTimInfo((unsigned long *)(tim + 4), &im2);
 		im2.cx = (m->clutPage & 0x3f) << 4;
 		im2.cy = m->clutPage >> 6;
+#ifdef DW1_NATIVE
+		nativeV0Known = 0;
+#endif
 		if ((im2.pmode >> 3 & 1) != 0) {
 			setRECT(&rect2, im2.cx, im2.cy, im2.cw, im2.ch);
+#ifdef DW1_NATIVE
+			nativeV0Known = 1;
+			nativeV0 =
+#endif
 			LoadImage(&rect2, im2.clut);
 		}
 		BTL_EFE_LOAD_STATE = 1;
@@ -1758,6 +1776,11 @@ int32_t BTL_setupLoadedEFEFile(EfeLoad *load)
 			GsMapModelingData((unsigned long *)&m->modelPtr->flags);
 			updateTMDTextureData((char *)m->modelPtr, m->pixelPage, m->pixelOffsetX, m->pixelOffsetY,
 			                     m->clutPage - 0x7a08);
+#ifdef DW1_NATIVE
+			/* updateTMDTextureData leaves the model's object count in v0. */
+			nativeV0 = m->modelPtr->nobj;
+			nativeV0Known = 1;
+#endif
 		}
 		BTL_EFE_LOAD_STATE = 2;
 	case 2:
@@ -1872,6 +1895,13 @@ int32_t BTL_setupLoadedEFEFile(EfeLoad *load)
 		return 0;
 	}
 end:;
+#ifdef DW1_NATIVE
+	/* The error paths and an unmatched load state fall off the end with the PS1's v0. */
+	if (!nativeV0Known) {
+		dw1_native_fatal("EFE loader error after GsGetTimInfo without a palette (v0 unmodelled)");
+	}
+	return nativeV0;
+#endif
 }
 
 void BTL_handleEFEFileLoaded(EfeLoad *load)

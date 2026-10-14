@@ -250,6 +250,10 @@ int32_t getItemOptionColor(int32_t mode)
 			return 0xa;
 		}
 	}
+#ifdef DW1_NATIVE
+	/* A mode outside 0-3, which the only caller never passes. */
+	dw1_native_fatal("getItemOptionColor with an unsupported mode");
+#endif
 }
 
 void drawInventoryText(void)

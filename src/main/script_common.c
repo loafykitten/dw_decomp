@@ -2558,6 +2558,14 @@ int32_t flipTextboxPage(uint8_t a)
 	entry->backPage ^= 1;
 	entry->flipCount++;
 	entry->pageReady = 0;
+#ifdef DW1_NATIVE
+	/* No return statement: the PS1 caller got v0 as its own caller left it. Measured and read
+	 * from the original code: tickNamingBox gets its own address (0x8010A018); the item menu
+	 * callers (through isItemMenuBoxBusy, which leaves v0 alone) a box pointer, an address,
+	 * their own address, or an earlier result they test with == 1. Every caller tests != 0 or
+	 * == 1, and 2 decides each test as those values did (docs/phase5-returns-audit.md). */
+	return 2;
+#endif
 }
 
 void calculateItemMenuStrings(ItemMenuBox *box, uint8_t row, int32_t isLast)

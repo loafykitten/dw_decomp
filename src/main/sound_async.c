@@ -165,6 +165,11 @@ int32_t loadSoundCompleteCallback(void *param)
 		addr = SsUtGetVBaddrInSB(sb->vabId);
 		return 0;
 	}
+#ifdef DW1_NATIVE
+	/* A state no transition sets: the PS1 returned v0 as the file queue's dispatcher left it,
+	 * this callback's own address (docs/phase5-returns-audit.md). */
+	return (int32_t)0x800E8CDCu;
+#endif
 }
 
 void uploadSoundBuffer(int32_t vabId)

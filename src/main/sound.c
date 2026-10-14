@@ -645,6 +645,11 @@ uint32_t playSound(int32_t vabId, int32_t val)
 	} else if ((2 < vabId) && (vabId < 8)) {
 		return startSound(vabId, 0, val);
 	}
+#ifdef DW1_NATIVE
+	/* An unsupported VAB: the PS1 returned the caller's v0, but no caller with such an id
+	 * uses the result (docs/phase5-returns-audit.md). */
+	return 0;
+#endif
 }
 
 void stopSound(void)
