@@ -67,12 +67,19 @@ int32_t loadTextureFile(char *path, uint32_t *outTPage, uint32_t *outClut)
 	setRECT(&rect, image.px, image.py, image.pw, image.ph);
 	LoadImage(&rect, image.pixel);
 
+#ifdef DW1_NATIVE
+	/* MURD passes NULL for both results: the PS1 wrote them to address 0. */
+	if (outTPage != NULL)
+#endif
 	*outTPage = GetTPage(image.pmode & 3, 0, image.px, image.py);
 
 	if (((image.pmode >> 3) & 1) != 0) {
 		setRECT(&rect, image.cx, image.cy, image.cw, image.ch);
 		LoadImage(&rect, image.clut);
 
+#ifdef DW1_NATIVE
+		if (outClut != NULL)
+#endif
 		*outClut = GetClut(image.cx, image.cy);
 	}
 }

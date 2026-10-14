@@ -45,7 +45,7 @@ void fadeoutCLUT1(int32_t level, int16_t *src, int32_t unused);
 void MURD_tickScene(int32_t instanceId);
 void MURD_renderScene(void);
 void MURD_initializeOrderingTables(void);
-void MURD_storeDigimonTexture(u_long buffer, Entity *entity);
+void MURD_storeDigimonTexture(uintptr_t buffer, Entity *entity);
 int32_t MURD_isDigimonLargerThanIris(Entity *entity, int32_t start, int32_t end, int32_t t);
 void MURD_setOtherEntitiesVisible(int32_t restore);
 void MURD_createLivesBox(Entity *entity);
@@ -342,7 +342,7 @@ void MURD_initializeOrderingTables(void)
 	MURD_ORDERING_TABLES[1].org = MURD_ORDERING_TABLE_0 + 0x800;
 }
 
-void MURD_storeDigimonTexture(u_long buffer, Entity *entity)
+void MURD_storeDigimonTexture(uintptr_t buffer, Entity *entity)
 {
 	TMDModel *tmd;
 	RECT rect;
@@ -397,6 +397,14 @@ void MURD_setOtherEntitiesVisible(int32_t restore)
 	MURD_ENTITIES_VISIBLE = restore;
 	if (restore == 0) {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			/* An empty slot: the PS1 read its isOnMap from low RAM and the restore below wrote
+			 * it back there; nothing else reads either. */
+			if (ENTITY_TABLE[i] == NULL) {
+				MURD_ENTITY_VISIBILITY[i] = 0;
+				continue;
+			}
+#endif
 			if ((ENTITY_TABLE[i] != (Entity *)&PARTNER_ENTITY) && (ENTITY_TABLE[i]->isOnMap != 0)) {
 				ENTITY_TABLE[i]->isOnMap = 0;
 				MURD_ENTITY_VISIBILITY[i] = 1;
@@ -406,6 +414,11 @@ void MURD_setOtherEntitiesVisible(int32_t restore)
 		}
 	} else {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			if (ENTITY_TABLE[i] == NULL) {
+				continue;
+			}
+#endif
 			if (ENTITY_TABLE[i] != (Entity *)&PARTNER_ENTITY) {
 				ENTITY_TABLE[i]->isOnMap = MURD_ENTITY_VISIBILITY[i];
 			}
