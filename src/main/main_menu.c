@@ -1704,6 +1704,15 @@ void renderCheckingCard(void)
 	GsSetWorkBase((PACKET *)cur);
 	renderMenuBox(0x36, 0x32, 0xd4, 0x3a);
 #else
+#ifdef DW1_NATIVE
+	/* Save slots: the operation line alone (drawMainMenuStrings, view 5). */
+	if (dw1_pc_saves) {
+		renderText(cur++, 0x40, 0x37, 0, 0, 0xC0, 0xC, 2);
+		GsSetWorkBase((PACKET *)cur);
+		renderMenuBox(0x36, 0x32, 0xD4, 0x16);
+		return;
+	}
+#endif
 	renderText(cur++, 0x40, 0x37, 0, 0, 0xC0, 0x24, 2);
 	GsSetWorkBase((PACKET *)cur);
 	renderMenuBox(0x36, 0x32, 0xD4, 0x2E);
