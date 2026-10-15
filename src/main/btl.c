@@ -248,6 +248,14 @@ int32_t handleBattleStart(id)
 			if (j != 3) {
 				continue;
 			}
+#ifdef DW1_NATIVE
+			/* An empty slot: the PS1 read isOnScreen from low RAM (0: [obs: RAM 0x0C-0x5F is
+			 * zero on the emulator in the field, 2026-10-15]), stored a 0 isOnMap back there,
+			 * and isInvisible(NULL) skipped the slot. Reached by Drill Tunnel's Drimogemon. */
+			if (ENTITY_TABLE[i] == NULL) {
+				continue;
+			}
+#endif
 			if (ENTITY_TABLE[i]->isOnScreen == 0) {
 				ENTITY_TABLE[i]->isOnMap = 0;
 			}
