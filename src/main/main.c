@@ -3325,9 +3325,17 @@ PositionData PARTNER_POSITION_DATA[34];
 uint8_t PARTNER_MODEL_BUFFER[0x18800];
 MomentumData TAMER_MOMENTUM_DATA[22];
 PositionData TAMER_POSITION_DATA[22];
+#ifdef DW1_NATIVE
+/* one object, as the PS1 laid them out (dw1_native.h): 0x801A1398-0x801B1B97, 0x10800 bytes */
+uint8_t dw1_tamer_collision_span[0x10800] __attribute__((aligned(8)));
+#define TAMER_MODEL_BUFFER DW1_TAMER_MODEL_BUFFER
+#define MAIN_D_801A8B98 ((char *)DW1_MAIN_D_801A8B98)
+#define MAP_COLLISION_DATA ((int8_t *)DW1_MAP_COLLISION_DATA)
+#else
 uint8_t TAMER_MODEL_BUFFER[0x7800];
 char MAIN_D_801A8B98[0x6800];
 int8_t MAP_COLLISION_DATA[0x2800];
+#endif
 StdVsCamera STDVS_CAMERA;
 
 static void *main_bss_order[] = {

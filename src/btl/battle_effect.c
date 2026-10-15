@@ -2171,7 +2171,12 @@ char *BTL_initializeEFEEngine(char *base)
 {
 	int32_t i;
 
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	EFE_DATA_PTR = (EfeSlot *)base;
 	for (i = 0; i < 0x10; i++) {
 		EFE_DATA_PTR[i].data = 0;
@@ -2183,12 +2188,27 @@ char *BTL_initializeEFEEngine(char *base)
 #else
 	base = (char *)((intptr_t)base + 0x280);
 #endif
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	base = BTL_initializeParticleEmitters(base);
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	base = initializeFlashData(base);
 	base = BTL_initializeAuraProjectiles(base);
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	EFE_HEAP_BASE = base;
 	EFE_HEAP_POINTER = EFE_HEAP_BASE;
 	addObject(0x500, 0, (TickFunction)BTL_tickEFEEngine, (RenderFunction)BTL_renderEFEEngine);
@@ -6454,9 +6474,15 @@ void BTL_initializeBuffTrails(void)
 	 * past the overlay image where nothing is allocated, so there is no
 	 * observable effect.
 	 */
+#ifdef DW1_NATIVE
+	/* Only the real element: natively the record is 0x138 bytes (0x12C on the PS1), so the
+	 * seven extra stores would hit unrelated native storage (see the BUG note). */
+	BTL_BUFF_TRAILS[0].frame = -1;
+#else
 	for (i = 0; i < 8; i++) {
 		BTL_BUFF_TRAILS[i].frame = -1;
 	}
+#endif
 
 	for (i = 0; i < 8; i++) {
 		pool[i] = i;
@@ -6465,7 +6491,13 @@ void BTL_initializeBuffTrails(void)
 	for (i = 0; i < 8; i++) {
 		r = rand() % (8 - i);
 		k = pool[r];
+#ifdef DW1_NATIVE
+		/* The PS1 also copied pool[8] (stack residue) into the last slot, which the next
+		 * round's smaller bound never selects: the same choices without the read. */
+		for (j = r; j + 1 < (8 - i); j++) {
+#else
 		for (j = r; j < (8 - i); j++) {
+#endif
 			pool[j] = pool[j + 1];
 		}
 		s = ((rand() % 0x14) + 0x50) * 200 / 100;

@@ -345,10 +345,19 @@ static void *script_interp_sbss_order[] = {
 uint8_t MAPHEAD_SCRIPT_BUFFER[0x6800];
 #elif !VERSION_IS(US)
 uint8_t MAPHEAD_SCRIPT_BUFFER[0x6000];
+#elif defined(DW1_NATIVE)
+/* One object, as on the PS1: initializeScripts reads MAPHEAD.SCN in whole sectors (0x6800
+ * bytes) into the 0x61A8 buffer, and the zero padding overruns the start of
+ * SCRIPT_OFFSET_TABLE, which the next read then fills from DG.SCN. */
+uint8_t dw1_script_span[0x61a8 + 0x2000] __attribute__((aligned(8)));
+#define MAPHEAD_SCRIPT_BUFFER (dw1_script_span)
+#define SCRIPT_OFFSET_TABLE (dw1_script_span + 0x61a8)
 #else
 uint8_t MAPHEAD_SCRIPT_BUFFER[0x61a8];
 #endif
+#ifndef SCRIPT_OFFSET_TABLE
 uint8_t SCRIPT_OFFSET_TABLE[0x2000];
+#endif
 #if !VERSION_IS(US) && !VERSION_IS(EU)
 uint8_t MAP_SCRIPT_BUFFER[0x2000];
 #else

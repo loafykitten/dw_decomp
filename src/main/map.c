@@ -186,7 +186,11 @@ extern int16_t HOUR;
 extern int32_t IS_SCRIPT_PAUSED;
 extern int32_t LOADED_DIGIMON_MODELS[];
 extern int16_t DOOA_STORED_DIGIMON_Y;
+#ifdef DW1_NATIVE
+#define MAP_COLLISION_DATA ((int8_t *)DW1_MAP_COLLISION_DATA)
+#else
 extern int8_t MAP_COLLISION_DATA[];
+#endif
 extern int8_t PARTNER_STATE;
 extern int8_t PARTNER_TAMER_PREVIOUS_TILE_X;
 extern int8_t PARTNER_TAMER_PREVIOUS_TILE_Y;
@@ -4237,7 +4241,25 @@ void setupMap(void)
 
 	for (i = 0; i < numCluts; i++) {
 		LoadClut(data, 0, 0x1e1 + i);
+#ifdef DW1_NATIVE
+		/* Three maps have 4 or 5 CLUTs (MIST02, MAYO01_2, TWNA02); the PS1 stored those past
+		 * MAP_CLUTS[3] into CAMERA_TARGET.vx and .vy, as the CLUT's 32-bit PS1 address. The
+		 * same values here, without native 8-byte stores past the array. */
+		if (i < 3) {
+			MAP_CLUTS[i] = data;
+		} else if (i < 5) {
+			int32_t ps1 = (int32_t)(0x80000000u | (uint32_t)((uint8_t *)data - dw1_ps1_ram));
+			if (i == 3) {
+				CAMERA_TARGET.vx = ps1;
+			} else {
+				CAMERA_TARGET.vy = ps1;
+			}
+		} else {
+			dw1_native_fatal("setupMap: more than five CLUTs (the PS1 would overwrite CAMERA_TARGET.vz)");
+		}
+#else
 		MAP_CLUTS[i] = data;
+#endif
 		data += 128;
 	}
 

@@ -338,7 +338,12 @@ int16_t CURRENT_SEQ_FONT;
 int16_t CURRENT_SEQ_TRACK;
 
 char SEQ_TABLE[SS_SEQ_TABSIZ];
+#ifdef DW1_NATIVE
+/* seqOpen reads 32-bit offsets from it: word-aligned as the PS1's 0x80148574 was */
+uint8_t SEQ_BUFFER[0x5800] __attribute__((aligned(4)));
+#else
 uint8_t SEQ_BUFFER[0x5800];
+#endif
 
 char VHB_EXT[] = ".VHB";
 

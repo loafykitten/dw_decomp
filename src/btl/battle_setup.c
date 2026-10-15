@@ -227,7 +227,13 @@ void BTL_handleBattleIntro(void)
 	count = 0;
 	for (i = 2; i < 0xa; i++) {
 		npc = (NPCEntity *)ENTITY_TABLE[i];
+#ifdef DW1_NATIVE
+		/* an empty slot passes NULL (the PS1 formed &NULL->first member, address 0), which
+		 * isInvisible treats as invisible */
+		if (isInvisible(npc == NULL ? NULL : &npc->digimonEntity.entity) == 0) {
+#else
 		if (isInvisible(&npc->digimonEntity.entity) == 0) {
+#endif
 			for (j = 1; j <= ENEMY_COUNT; j++) {
 				if (COMBAT_DATA_PTR->player.entityIds[j] == i) {
 					break;

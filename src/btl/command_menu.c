@@ -94,6 +94,34 @@ static void *command_menu_functions[] = {
 
 uint8_t BTL_COMMAND_LABEL_U[5] = { 0, 11, 25, 39, 50 };
 uint8_t BTL_COMMAND_LABEL_W[8] = { 11, 14, 14, 11, 11, 0, 0, 0 };
+
+#ifdef DW1_NATIVE
+/* A layout's unused entries are 0xFF, which a six-command menu (no case in the layout choice)
+ * can reach: the PS1 read U from STD_INTRO_CAMERA_STAGE1_ROT + 7 and W from
+ * STD_CAMERA_CHASE_OFFSET + 7, both 0 (zero SVECTOR pads in the retail executable). Any other
+ * index past the tables is unmeasured: stop. */
+static uint8_t BTL_commandLabelU(uint8_t label)
+{
+	if (label < 5) {
+		return BTL_COMMAND_LABEL_U[label];
+	}
+	if (label != 0xFF) {
+		dw1_native_fatal("BTL_commandLabelU: a label past the table");
+	}
+	return 0;
+}
+
+static uint8_t BTL_commandLabelW(uint8_t label)
+{
+	if (label < 8) {
+		return BTL_COMMAND_LABEL_W[label];
+	}
+	if (label != 0xFF) {
+		dw1_native_fatal("BTL_commandLabelW: a label past the table");
+	}
+	return 0;
+}
+#endif
 uint8_t BTL_DEATH_COUNTDOWN_DIGIT_U[4] = { 0x50, 0x68, 0x58, 0x68 };
 uint8_t BTL_DEATH_COUNTDOWN_DIGIT_V[4] = { 0xa8, 0x90, 0x90, 0x80 };
 
@@ -298,7 +326,12 @@ int16_t arg0;
 		setTPage(prim, 0, 0, 960, 256);
 		setClut(prim, 272, 497);
 		setRGB0(prim, 0x80, 0x80, 0x80);
+#ifdef DW1_NATIVE
+		setUVWH(prim, BTL_commandLabelU(BTL_COMMAND_MENU_LAYOUTS[BTL_COMMAND_MENU_LAYOUT][i]), 0xe0,
+		        BTL_commandLabelW(BTL_COMMAND_MENU_LAYOUTS[BTL_COMMAND_MENU_LAYOUT][i]), 31);
+#else
 		setUVWH(prim, BTL_COMMAND_LABEL_U[BTL_COMMAND_MENU_LAYOUTS[BTL_COMMAND_MENU_LAYOUT][i]], 0xe0, BTL_COMMAND_LABEL_W[BTL_COMMAND_MENU_LAYOUTS[BTL_COMMAND_MENU_LAYOUT][i]], 31);
+#endif
 		if (i > 0) {
 			rowY = ((i - 1) * 0xe) + 0xb;
 		} else {

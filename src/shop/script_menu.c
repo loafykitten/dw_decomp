@@ -466,10 +466,19 @@ char **NAMING_CHAR_PAGES[6] = {
 	CHAR_PAGE3_RIGHT,
 };
 
+#ifdef DW1_NATIVE
+/* renderNamingBox's last box reads entries 9-11: on the PS1, 10 and 11 were the first two
+ * halfwords of NAMING_ROLLOVER_CHARS (0x8000 each), here as the table's own entries. */
+int16_t NAMING_CTRL_BOXES[12] = {
+	0x000e, 0x0006, 0x0030, 0x000e, 0x005a, 0x0030, 0x000e, 0x0076,
+	0x0018, 0x0000, (int16_t)0x8000, (int16_t)0x8000,
+};
+#else
 int16_t NAMING_CTRL_BOXES[10] = {
 	0x000e, 0x0006, 0x0030, 0x000e, 0x005a, 0x0030, 0x000e, 0x0076,
 	0x0018, 0x0000,
 };
+#endif
 
 uint16_t NAMING_ROLLOVER_CHARS[10] = {
 	0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000,

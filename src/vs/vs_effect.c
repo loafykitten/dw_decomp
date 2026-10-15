@@ -1907,7 +1907,12 @@ char *VS_initializeEFEEngine(char *base)
 {
 	int32_t i;
 
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	EFE_DATA_PTR = (EfeSlot *)base;
 	for (i = 0; i < 0x10; i++) {
 		EFE_DATA_PTR[i].data = 0;
@@ -1919,12 +1924,27 @@ char *VS_initializeEFEEngine(char *base)
 #else
 	base = (char *)((intptr_t)base + 0x280);
 #endif
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	base = VS_initializeParticleEmitters(base);
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	base = initializeFlashData(base);
 	base = VS_initializeAuraProjectiles(base);
+#ifdef DW1_NATIVE
+	/* the records carved here hold pointers: 8-byte aligned natively */
+	base = (char *)(((intptr_t)base + 7) & ~(intptr_t)7);
+#else
 	base = (char *)((intptr_t)base + (4 - ((intptr_t)base & 3)));
+#endif
 	EFE_HEAP_BASE = base;
 	EFE_HEAP_POINTER = EFE_HEAP_BASE;
 	addObject(0x500, 0, (TickFunction)VS_tickEFEEngine, (RenderFunction)VS_renderEFEEngine);

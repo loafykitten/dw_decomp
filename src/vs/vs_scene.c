@@ -37,8 +37,16 @@ extern int32_t ACTIVE_FRAMEBUFFER;
 extern int32_t DRAWING_OFFSET_X;
 extern int32_t DRAWING_OFFSET_Y;
 extern char MAIN_D_80124C54[];
+#ifdef DW1_NATIVE
+#define TAMER_MODEL_BUFFER ((char *)DW1_TAMER_MODEL_BUFFER)
+#else
 extern char TAMER_MODEL_BUFFER[];
+#endif
+#ifdef DW1_NATIVE
+#define MAP_COLLISION_DATA ((int8_t *)DW1_MAP_COLLISION_DATA)
+#else
 extern int8_t MAP_COLLISION_DATA[];
+#endif
 
 void GsGetTimInfo(unsigned long *tim, GsIMAGE *img);
 void readFile(char *path, void *dest);

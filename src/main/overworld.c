@@ -487,7 +487,13 @@ void renderMapOverlays(LocalMapObjectInstance *instances, int16_t screenX,
 	org = ACTIVE_ORDERING_TABLE->org;
 	for (i = 0; i < 188; i++) {
 		startFrame = instances->currentFrame;
+#ifdef DW1_NATIVE
+		/* the sentinel first: the PS1 read animSprites[-1] (the record's y) for an inactive
+		 * instance, which can't change the result */
+		if (startFrame == -1 || instances->animSprites[startFrame] == -1) {
+#else
 		if (instances->animSprites[startFrame] == -1 || startFrame == -1) {
+#endif
 			instances++;
 			continue;
 		}
@@ -527,8 +533,14 @@ void renderMapOverlays(LocalMapObjectInstance *instances, int16_t screenX,
 			if (instances->timer == instances->animTimes[startFrame]) {
 				instances->currentFrame++;
 				instances->timer = 0;
+#ifdef DW1_NATIVE
+				/* the bound first (the PS1 read animSprites[8], animTimes[0..1]) */
+				if (instances->currentFrame >= 8 ||
+				    instances->animSprites[instances->currentFrame] == -1) {
+#else
 				if (instances->animSprites[instances->currentFrame] == -1 ||
 				    instances->currentFrame >= 8) {
+#endif
 					instances->currentFrame = 0;
 				}
 			}
@@ -537,8 +549,14 @@ void renderMapOverlays(LocalMapObjectInstance *instances, int16_t screenX,
 			if (instances->timer == instances->animTimes[startFrame]) {
 				instances->currentFrame++;
 				instances->timer = 0;
+#ifdef DW1_NATIVE
+				/* the bound first (the PS1 read animSprites[8], animTimes[0..1]) */
+				if (instances->currentFrame >= 8 ||
+				    instances->animSprites[instances->currentFrame] == -1) {
+#else
 				if (instances->animSprites[instances->currentFrame] == -1 ||
 				    instances->currentFrame >= 8) {
+#endif
 					instances->currentFrame = 0;
 				}
 			}
