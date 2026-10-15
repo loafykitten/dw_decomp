@@ -23,11 +23,24 @@
 
 #define EFE_SCRATCH ((EfeScratch *)getScratchAddr(0))
 #define EFE_SPRITE_SCRATCH ((EfeSpriteScratch *)getScratchAddr(0))
+#ifdef DW1_NATIVE
+/* EfeScratch (from word 0) is 128 bytes on the PS1 but 152 natively (GsDOBJ2's two pointers and
+ * `scale`), so it would run into the areas the PS1 placed from word 34 on (the radial waves'
+ * ring counter overwrote `scale`). Those areas move up together by the 24 bytes it grew, keeping
+ * their places relative to each other (the projection scratch is the wave scratch's `proj`). */
+#define DW1_EFE_SCRATCH_SHIFT 6
+#define EFE_PROJ_SCRATCH ((EfeProjScratch *)getScratchAddr(42 + DW1_EFE_SCRATCH_SHIFT))
+#define EFE_WAVE_SCRATCH ((EfeWaveScratch *)getScratchAddr(34 + DW1_EFE_SCRATCH_SHIFT))
+#define EFE_RIBBON_SCRATCH ((EfeRibbonScratch *)getScratchAddr(42 + DW1_EFE_SCRATCH_SHIFT))
+
+#define EFE_SORT_WORKSPACE getScratchAddr(44 + DW1_EFE_SCRATCH_SHIFT)
+#else
 #define EFE_PROJ_SCRATCH ((EfeProjScratch *)getScratchAddr(42))
 #define EFE_WAVE_SCRATCH ((EfeWaveScratch *)getScratchAddr(34))
 #define EFE_RIBBON_SCRATCH ((EfeRibbonScratch *)getScratchAddr(42))
 
 #define EFE_SORT_WORKSPACE getScratchAddr(44)
+#endif
 
 typedef struct {
 	int32_t vx;
@@ -202,6 +215,11 @@ typedef struct {
 	long id;
 } EfeScratch;
 
+#ifdef DW1_NATIVE
+_Static_assert(sizeof(EfeScratch) <= (34 + DW1_EFE_SCRATCH_SHIFT) * 4,
+	       "EfeScratch overlaps the scratch areas from word 34");
+#endif
+
 typedef struct {
 	long sxy;
 	long otz;
@@ -211,6 +229,11 @@ typedef struct {
 	SVECTOR point;
 	GsSPRITE sprite;
 } EfeSpriteScratch;
+
+#ifdef DW1_NATIVE
+_Static_assert(sizeof(EfeSpriteScratch) <= (34 + DW1_EFE_SCRATCH_SHIFT) * 4,
+	       "EfeSpriteScratch overlaps the scratch areas from word 34");
+#endif
 
 typedef struct {
 	long p;
