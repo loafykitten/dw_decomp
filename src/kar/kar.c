@@ -113,6 +113,25 @@ int32_t tickCameraMoveTo(int16_t x, int16_t z, int32_t speed);
 void uploadMapTileImages();
 void moveCameraByDiff(VECTOR *from, VECTOR *to);
 
+
+#ifdef DW1_NATIVE
+/* Three of KAR's string tables hold NULL entries that the US build draws: the Start Game
+ * prompt's second string ("Start Game" and "Explain Game" are one string in the US text) and
+ * the row after a hint page's last line (the rows count up to four per box, so the last page
+ * reads one entry past its lines: the table's closing NULL). The PS1 drew from address 0,
+ * whose halfwords are 0x0003, 0x0000 [obs: Redux RAM dumps at the lake, the curling rink and
+ * Beetle Land, 2026-10-15]: one glyph 3, then the end. Natively the same two halfwords. */
+static void KAR_drawStringOrLowRam(char *str, int32_t x, int32_t y)
+{
+	uint16_t ps1LowRam[2] = { 0x0003, 0x0000 };
+
+	drawString((str != NULL) ? str : (char *)ps1LowRam, x, y);
+}
+#define KAR_DRAW_STRING KAR_drawStringOrLowRam
+#else
+#define KAR_DRAW_STRING drawString
+#endif
+
 static void *kar_functions[] = {
 	KAR_renderSprite,
 	KAR_rotatePoint,
@@ -2039,7 +2058,7 @@ int8_t KAR_tickYesNoPrompt(void)
 	startPos = MAIN_D_80134A18;
 	strs = MAIN_D_80134A20;
 	while (MAIN_D_80135250 < 2) {
-		drawString(strs.text[MAIN_D_80135250], 0, (MAIN_D_80135250 * 13) + 0xdd);
+		KAR_DRAW_STRING(strs.text[MAIN_D_80135250], 0, (MAIN_D_80135250 * 13) + 0xdd);
 		MAIN_D_80135250++;
 		break;
 	}
@@ -2473,7 +2492,7 @@ int32_t KAR_drawHintPagePenguinmon(int32_t idx, int8_t n)
 		setTextColor(1);
 	}
 
-	drawString(strs.text[offs.start[idx] + n], 0, (n * 13) + 1);
+	KAR_DRAW_STRING(strs.text[offs.start[idx] + n], 0, (n * 13) + 1);
 #if !VERSION_IS(US)
 	if ((idx == 1) && (n == HINT_HIGHLIGHT_ROW_1)) {
 		setTextColor(HINT_HIGHLIGHT_COLOR);
@@ -2507,7 +2526,7 @@ int32_t KAR_drawHintPageMetalMamemon(int32_t idx, int8_t n)
 		setTextColor(1);
 	}
 
-	drawString(strs.text[offs.start[idx] + n], 0, (n * 13) + 1);
+	KAR_DRAW_STRING(strs.text[offs.start[idx] + n], 0, (n * 13) + 1);
 #if !VERSION_IS(US)
 	if ((idx == 1) && (n == HINT_HIGHLIGHT_ROW_1)) {
 		setTextColor(HINT_HIGHLIGHT_COLOR);

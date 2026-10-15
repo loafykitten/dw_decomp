@@ -28,6 +28,13 @@ void FISH_loadTMDModel(TMDFileLoadingData *model, char *path, uint8_t *buf, uint
 	readFile(path, model->targetBuffer);
 
 	model->objCount = model->targetBuffer->nobj;
+#ifdef DW1_NATIVE
+	/* The file's end is only rounded to four bytes (SAO.TMD is 1,660 bytes), but native GsDOBJ2
+	 * records hold pointers and need eight-byte alignment: start them at the next aligned
+	 * offset. Where they sit is representation only; both models still fit their 4,096-byte
+	 * buffers (Phase 9 audit, finding 12). */
+	size = (size + (int32_t)_Alignof(GsDOBJ2) - 1) & ~((int32_t)_Alignof(GsDOBJ2) - 1);
+#endif
 	model->objects = (GsDOBJ2 *)(buf + size);
 
 	if (bufSize < (size + (model->objCount * sizeof(GsDOBJ2)))) {
