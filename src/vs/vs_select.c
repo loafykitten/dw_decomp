@@ -277,6 +277,12 @@ void VS__loadTextures(void)
 	int32_t j;
 
 #if VERSION_EQUAL_OR_NEWER(JP_TRIAL)
+#ifdef DW1_NATIVE
+	/* Battle Mode starts from the title menu, where ENTITY_TABLE[0] is NULL: the PS1 stored the
+	 * zero at address 0x35 in the kernel's low RAM, which already held 0 [obs: 2026-10-15,
+	 * p9-arena-etprobe]. Nothing of the game's changes; skip the store. */
+	if (ENTITY_TABLE[0] != NULL)
+#endif
 	ENTITY_TABLE[0]->isOnScreen = 0;
 #endif
 	loadTIMFile(VS__PATH_ETCDAT_SYSTEM_W_TIM, GENERAL_BUFFER);

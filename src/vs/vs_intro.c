@@ -393,10 +393,11 @@ void VS__runIntro(stage)
 	}
 
 #ifdef DW1_NATIVE
-	/* The PS1 tested `pad & ~prev` here before prev was ever set (whatever its register held).
-	 * 0 is STD_runIntro's value for the same loop, but NOT verified against the PS1: needs an
-	 * emulator check (only matters if the confirm button is already held on the first frame). */
-	prev = 0;
+	/* The PS1 tested `pad & ~prev` here before prev was ever set: prev is $s1, which nothing
+	 * here sets, so it is VS_initializeVS's caller's $s1, measured as 1 at entry [obs:
+	 * 2026-10-15, the battle-mode recording, captures/oracle-runs/p9-arena-vs-record]. Only its
+	 * CONFIRM_BUTTON bit (0x40) is ever tested, and the second loop shifts it out. */
+	prev = 1;
 #endif
 	while (ENTITY_TABLE[1]->anim.animFlag & 1) {
 		pad = PadRead(1);
