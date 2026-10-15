@@ -82,8 +82,7 @@ void loadMap(uint16_t mapId);
 uint8_t *getScriptSection(uint8_t *script, int32_t section);
 #ifdef DW1_NATIVE
 /* The buffer is an address (file_queue.c takes a pointer); an int32_t would cut it natively. */
-int32_t addFileReadRequestPath(char *path, uint8_t *buffer, uint8_t *isRunning,
-                               void *callback, void *callbackParam);
+#include <dw/file_queue.h>
 #else
 int32_t addFileReadRequestPath(char *path, int32_t buffer, uint8_t *isRunning,
                                void *callback, void *callbackParam);
