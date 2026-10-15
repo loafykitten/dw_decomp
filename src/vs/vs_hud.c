@@ -840,6 +840,10 @@ void VS_renderBattleStartText(void)
 	m = GsWSMATRIX;
 #endif
 	GsSetProjection(0x200);
+#ifdef DW1_NATIVE
+	/* the text tiles are 2D: no wobble keeps their integer corners, as their shadows have */
+	dw1_pgxp_2d(1);
+#endif
 	GsSetLsMatrix(&VS_BATTLE_START_TEXT_MATRIX);
 
 	n = 0;
@@ -951,6 +955,9 @@ void VS_renderBattleStartText(void)
 	}
 
 	GsSetWorkBase((PACKET *)prim);
+#ifdef DW1_NATIVE
+	dw1_pgxp_2d(0);
+#endif
 	GsSetProjection(VIEWPORT_DISTANCE);
 #if VERSION_IS(JP)
 	GsSetRefView2(&GS_VIEWPOINT);
@@ -993,6 +1000,10 @@ void VS_renderBattleStartTextBurst(void)
 	saved = GsWSMATRIX;
 #endif
 	GsSetProjection(0x200);
+#ifdef DW1_NATIVE
+	/* the text tiles are 2D: no wobble keeps their integer corners, as their shadows have */
+	dw1_pgxp_2d(1);
+#endif
 	GsSetLsMatrix(&VS_BATTLE_START_TEXT_MATRIX);
 
 	corner[0].vx = -4;
@@ -1078,6 +1089,9 @@ void VS_renderBattleStartTextBurst(void)
 	if (dead == 0x9b) {
 		VS_BATTLE_TEXT_FINISHED = 1;
 	}
+#ifdef DW1_NATIVE
+	dw1_pgxp_2d(0);
+#endif
 	GsSetProjection(VIEWPORT_DISTANCE);
 #if VERSION_IS(JP)
 	GsSetRefView2(&GS_VIEWPOINT);

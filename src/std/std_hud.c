@@ -640,6 +640,10 @@ void STD_renderBattleStartText(void)
 	uint16_t clut;
 
 	GsSetProjection(0x200);
+#ifdef DW1_NATIVE
+	/* the text tiles are 2D: no wobble keeps their integer corners, as their shadows have */
+	dw1_pgxp_2d(1);
+#endif
 	GsSetLsMatrix(&STD_BATTLE_START_TEXT_MATRIX);
 
 	n = 0;
@@ -751,6 +755,9 @@ void STD_renderBattleStartText(void)
 	}
 
 	GsSetWorkBase((PACKET *)prim);
+#ifdef DW1_NATIVE
+	dw1_pgxp_2d(0);
+#endif
 	GsSetProjection(VIEWPORT_DISTANCE);
 	GsSetRefView2(&GS_VIEWPOINT);
 }
@@ -785,6 +792,10 @@ void STD_renderBattleStartTextBurst(void)
 	int16_t cy;
 
 	GsSetProjection(0x200);
+#ifdef DW1_NATIVE
+	/* the text tiles are 2D: no wobble keeps their integer corners, as their shadows have */
+	dw1_pgxp_2d(1);
+#endif
 	GsSetLsMatrix(&STD_BATTLE_START_TEXT_MATRIX);
 
 	corner[0].vx = -4;
@@ -870,6 +881,9 @@ void STD_renderBattleStartTextBurst(void)
 	if (dead == 0x9b) {
 		STD_BATTLE_TEXT_FINISHED = 1;
 	}
+#ifdef DW1_NATIVE
+	dw1_pgxp_2d(0);
+#endif
 	GsSetProjection(VIEWPORT_DISTANCE);
 	GsSetRefView2(&GS_VIEWPOINT);
 }
