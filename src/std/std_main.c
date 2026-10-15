@@ -101,7 +101,14 @@ void createParticleFX();
 void collisionGrace(Entity *a, Entity *entity, int32_t c, int32_t d);
 int32_t STD_handlePartnerMoveCommand(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter);
 int32_t STD_tickMeleeAttack(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter, int16_t arg3);
+#ifdef DW1_NATIVE
+/* callerS3: the caller's $s3, which the PS1 used as `tech` on the finisher path (below). */
+void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter, int32_t callerS3);
+/* A caller whose $s3 holds a pointer, not a technique. */
+#define STD_S3_NOT_A_TECH INT32_MIN
+#else
 void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter);
+#endif
 int16_t STD_getMostEffectiveMove(int32_t arg0, int16_t *flags);
 void addEntityText(Entity *entity, long slot, int32_t color, int32_t value, uint8_t flag);
 void setupModelMatrix(PositionData *posData);
@@ -4866,7 +4873,11 @@ void STD_tickConfusedState(DigimonEntity *digimon, DigimonEntity *target, Fighte
 			return;
 		}
 		handleBattleIdle(digimon, &digimon->stats, fighter->flags);
+#ifdef DW1_NATIVE
+		STD_startQueuedMove(digimon, target, fighter, arg3);
+#else
 		STD_startQueuedMove(digimon, target, fighter);
+#endif
 		return;
 	}
 
@@ -4882,7 +4893,11 @@ void STD_tickConfusedState(DigimonEntity *digimon, DigimonEntity *target, Fighte
 		break;
 	case 4:
 		handleBattleIdle(digimon, &digimon->stats, fighter->flags);
+#ifdef DW1_NATIVE
+		STD_startQueuedMove(digimon, target, fighter, arg3);
+#else
 		STD_startQueuedMove(digimon, target, fighter);
+#endif
 		break;
 	}
 }
@@ -5006,7 +5021,11 @@ void STD_tickQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterDa
 			break;
 		case 4:
 			handleBattleIdle(digimon, &digimon->stats, fighter->flags);
+#ifdef DW1_NATIVE
+			STD_startQueuedMove(digimon, target, fighter, arg3);
+#else
 			STD_startQueuedMove(digimon, target, fighter);
+#endif
 			break;
 		}
 	}
@@ -5162,7 +5181,11 @@ void STD_tickDigimonAttackRanged(DigimonEntity *entity, DigimonEntity *other,
 	}
 
 	if (NO_AI_FLAG != 0 && &entity->entity == FINISHING_ENTITY) {
+#ifdef DW1_NATIVE
+		STD_startQueuedMove(entity, other, data, move);
+#else
 		STD_startQueuedMove(entity, other, data);
+#endif
 		return;
 	}
 
@@ -5186,13 +5209,21 @@ void STD_tickDigimonAttackRanged(DigimonEntity *entity, DigimonEntity *other,
 
 		if ((data->flags & FIGHTER_FLAG_FLATTENED) != 0) {
 			if (BATTLE_FRAME_COUNT % 40 == 0) {
+#ifdef DW1_NATIVE
+				STD_startQueuedMove(entity, other, data, move);
+#else
 				STD_startQueuedMove(entity, other, data);
+#endif
 			} else {
 				entityLookAtLocation(&entity->entity,
 				                     &other->entity.posData->location);
 			}
 		} else {
+#ifdef DW1_NATIVE
+			STD_startQueuedMove(entity, other, data, move);
+#else
 			STD_startQueuedMove(entity, other, data);
+#endif
 		}
 	}
 }
@@ -5847,7 +5878,12 @@ skipViewpoint:
 						fighter->queuedAnim = moves[j];
 						fighter->targetId = STD_getFighterSlot(attack.casterId);
 						fighter->moveRange = 1;
+#ifdef DW1_NATIVE
+						STD_startQueuedMove((DigimonEntity *)entity, (DigimonEntity *)attacker, fighter,
+						                    STD_S3_NOT_A_TECH);
+#else
 						STD_startQueuedMove((DigimonEntity *)entity, (DigimonEntity *)attacker, fighter);
+#endif
 						attacker->anim.animFlag &= 0xfe;
 						handled = 1;
 						((DigimonEntity *)entity)->stats.current.isHit = 0;
@@ -6643,7 +6679,11 @@ void STD_applyChargeRequirement(DigimonEntity *digimon, FighterData *fighter, in
 	}
 }
 
+#ifdef DW1_NATIVE
+void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter, int32_t callerS3)
+#else
 void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter)
+#endif
 {
 	int16_t tech;
 #ifdef DW1_NATIVE
@@ -6695,10 +6735,18 @@ void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterD
 		}
 	}
 #ifdef DW1_NATIVE
-	/* Reached with a finisher already running and its timer spent: `tech` was never set, and
-	 * the PS1 read whatever its register held. Not reproduced; stop instead. */
+	/* Reached with a finisher already running and its timer spent, `tech` was never set: the PS1
+	 * kept it in $s3, which this function sets only on the other branch, so it is the caller's $s3
+	 * (STD_tickDigimonAttackRanged's `move`, the fighter index `arg3` in STD_tickQueuedMove and
+	 * STD_tickConfusedState) [obs: 2026-10-15, oracle/probe-std-tech.lua on the cup recording: an
+	 * enemy's ranged finisher, called from STD_tickDigimonAttackRanged, $s3 = its move 0x57]. Its
+	 * only use is MOVE_DATA[tech].unk3 & 2 below. STD_tickAttackHits's $s3 is the attacker's
+	 * address, which can't be reproduced: stop there. */
 	if (!techKnown) {
-		dw1_native_fatal("STD_startQueuedMove: finisher move with tech never set");
+		if (callerS3 == STD_S3_NOT_A_TECH || callerS3 < 0 || callerS3 >= 122) {
+			dw1_native_fatal("STD_startQueuedMove: finisher move with tech never set");
+		}
+		tech = callerS3;
 	}
 #endif
 	if ((MOVE_DATA[tech].unk3 & 2) != 0) {
