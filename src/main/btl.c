@@ -249,9 +249,10 @@ int32_t handleBattleStart(id)
 				continue;
 			}
 #ifdef DW1_NATIVE
-			/* An empty slot (Machinedramon's battle has one enemy): the PS1 read isOnScreen
-			 * from RAM 0x41, 0 [obs: Redux, in battle], so it stored 0 at RAM 0x40, already 0,
-			 * and isInvisible(NULL) skipped the slot. */
+			/* An empty slot (Machinedramon's battle has one enemy; also Drill Tunnel's
+			 * Drimogemon): the PS1 read isOnScreen from RAM 0x41, 0 [obs: Redux, in battle; RAM
+			 * 0x0C-0x5F is zero in the field too], so it stored 0 at RAM 0x40, already 0, and
+			 * isInvisible(NULL) skipped the slot. */
 			if (ENTITY_TABLE[i] == NULL) {
 				continue;
 			}
