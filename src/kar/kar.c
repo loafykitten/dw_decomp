@@ -2039,6 +2039,18 @@ int8_t KAR_tickYesNoPrompt(void)
 	startPos = MAIN_D_80134A18;
 	strs = MAIN_D_80134A20;
 	while (MAIN_D_80135250 < 2) {
+#ifdef DW1_NATIVE
+		/* In the US build the pair's second string is NULL ("Start Game" and "Explain Game"
+		 * are one string): the PS1 drew from address 0, whose halfwords are 0x0003, 0x0000
+		 * [obs: Redux RAM dumps at the lake, the curling rink and Beetle Land, 2026-10-15],
+		 * so one glyph 3 and the end. Natively the same two halfwords. */
+		uint16_t ps1LowRam[2] = { 0x0003, 0x0000 };
+		if (strs.text[MAIN_D_80135250] == NULL) {
+			drawString((char *)ps1LowRam, 0, (MAIN_D_80135250 * 13) + 0xdd);
+			MAIN_D_80135250++;
+			break;
+		}
+#endif
 		drawString(strs.text[MAIN_D_80135250], 0, (MAIN_D_80135250 * 13) + 0xdd);
 		MAIN_D_80135250++;
 		break;
