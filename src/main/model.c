@@ -17,7 +17,11 @@
 #include <dw/world_object.h>
 
 extern uint8_t PARTNER_MODEL_BUFFER[];
+#ifdef DW1_NATIVE
+#define TAMER_MODEL_BUFFER DW1_TAMER_MODEL_BUFFER
+#else
 extern uint8_t TAMER_MODEL_BUFFER[];
+#endif
 
 extern GsOT *ACTIVE_ORDERING_TABLE;
 void renderDropShadow(Entity *entity);

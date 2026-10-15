@@ -384,7 +384,12 @@ void loadBattleData(int32_t entityId, int32_t count)
 	startAnimation(&TAMER_ENTITY.entity, 1);
 	for (i = 2; i < 10; i++) {
 		e = (DigimonEntity *)ENTITY_TABLE[i];
+#ifdef DW1_NATIVE
+		/* an empty slot passes NULL, as the PS1's &NULL->entity (address 0) did */
+		if (isInvisible(e == NULL ? NULL : &e->entity) == 0) {
+#else
 		if (isInvisible(&e->entity) == 0) {
+#endif
 			startAnimation(&e->entity, 0x21);
 		}
 	}

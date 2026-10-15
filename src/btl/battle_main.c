@@ -18,6 +18,25 @@
 
 #include "common.h"
 
+#ifdef DW1_NATIVE
+/* moves[animId - 0x2E] of a species: the PS1 indexed with any animation, so non-attack
+ * animations (0x20-0x2D) read the record's earlier fields (e.g. -10 is radius's high byte).
+ * The record has no pointers and keeps its layout natively, so the same byte is read from the
+ * table's object representation; a read leaving the table stops. */
+static uint8_t BTL_digimonMove(int32_t type, int32_t index)
+{
+	intptr_t at = (intptr_t)type * (intptr_t)sizeof(DIGIMON_DATA[0]) +
+	              (intptr_t)__builtin_offsetof(DigimonPara, moves) + index;
+	if (at < 0 || at >= (intptr_t)(NUM_DIGIMON * sizeof(DIGIMON_DATA[0]))) {
+		dw1_native_fatal("BTL_digimonMove: a move index outside DIGIMON_DATA");
+	}
+	return ((const uint8_t *)DIGIMON_DATA)[at];
+}
+#define BTL_DIGIMON_MOVE(type, index) BTL_digimonMove((type), (index))
+#else
+#define BTL_DIGIMON_MOVE(type, index) DIGIMON_DATA[type].moves[DW1_WRAP_INDEX(index)]
+#endif
+
 typedef struct {
 	int16_t flags[4];
 	int16_t enemies[5];
@@ -2113,7 +2132,7 @@ void BTL_tickAttackHits(void)
 		}
 		entity = ENTITY_TABLE[COMBAT_DATA_PTR->player.entityIds[i]];
 		tech = BTL_getAttackTech(&attack);
-		if (DIGIMON_DATA[entity->type].moves[DW1_WRAP_INDEX(entity->anim.animId - 0x2e)] == 0x2d) {
+		if (BTL_DIGIMON_MOVE(entity->type, entity->anim.animId - 0x2e) == 0x2d) {
 			if (COMBAT_DATA_PTR->player.entityIds[fighter->targetId] == attack.casterId) {
 				((DigimonEntity *)entity)->stats.current.isHit = 0;
 				continue;
@@ -2160,7 +2179,7 @@ void BTL_tickAttackHits(void)
 			continue;
 		}
 		handled = 0;
-		if (!(fighter->flags & FIGHTER_FLAG_BLOCKING) && (MOVE_DATA[tech].range == 1) && (DIGIMON_DATA[entity->type].moves[DW1_WRAP_INDEX(entity->anim.animId - 0x2e)] != 0x2d)) {
+		if (!(fighter->flags & FIGHTER_FLAG_BLOCKING) && (MOVE_DATA[tech].range == 1) && (BTL_DIGIMON_MOVE(entity->type, entity->anim.animId - 0x2e) != 0x2d)) {
 			moves = ((DigimonEntity *)entity)->stats.base.moves;
 			for (j = 0; j < 4; j++) {
 				if (((DigimonEntity *)entity)->stats.current.currentMP < 0xa5) {

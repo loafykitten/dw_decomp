@@ -6,7 +6,11 @@
 
 #include "common.h"
 
+#ifdef DW1_NATIVE
+#define MAP_COLLISION_DATA ((uint8_t *)DW1_MAP_COLLISION_DATA)
+#else
 extern uint8_t MAP_COLLISION_DATA[];
+#endif
 void getModelTile(VECTOR *pos, int16_t *outTileX, int16_t *outTileY);
 void loadMapCollisionData(int8_t *src);
 int32_t getTileTrigger(VECTOR *pos);
@@ -14,6 +18,12 @@ int32_t checkMapCollisionX(Entity *entity, int32_t direction);
 int32_t checkMapCollisionZ(Entity *entity, int32_t direction);
 void setImpassableRect(int32_t x, int32_t y, int32_t w, int32_t h);
 void setImpassableSquare(int32_t x, int32_t y, int32_t r);
+
+#ifdef DW1_NATIVE
+#define DW1_COLLISION_IDX(i) dw1_collision_index(i)
+#else
+#define DW1_COLLISION_IDX(i) (i)
+#endif
 
 static inline int32_t copyValue(int32_t value)
 {
@@ -42,12 +52,12 @@ int32_t getTileTrigger(VECTOR *pos)
 	if (pos->vz > 0) {
 		tz--;
 	}
-	if ((MAP_COLLISION_DATA[tx + tz * 100] != 0) &&
-	    (MAP_COLLISION_DATA[tx + tz * 100] != 0x80) &&
-	    (MAP_COLLISION_DATA[tx + tz * 100] != 0xFF80)) {
-		return (int8_t)MAP_COLLISION_DATA[tx + tz * 100];
+	if ((MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] != 0) &&
+	    (MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] != 0x80) &&
+	    (MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] != 0xFF80)) {
+		return (int8_t)MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)];
 	}
-	if (MAP_COLLISION_DATA[tx + tz * 100] == 0) {
+	if (MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] == 0) {
 		return 0;
 	} else {
 		return -1;
@@ -92,7 +102,7 @@ int8_t direction;
 	}
 
 	for (; tile <= rightTile; tile++) {
-		if ((MAP_COLLISION_DATA[tile + edgeTile * 100] & 0x80) != 0) {
+		if ((MAP_COLLISION_DATA[DW1_COLLISION_IDX(tile + edgeTile * 100)] & 0x80) != 0) {
 			return 1;
 		}
 	}
@@ -137,7 +147,7 @@ int8_t direction;
 	}
 
 	for (; tile <= bottomTile; tile++) {
-		if ((MAP_COLLISION_DATA[edgeTile + tile * 100] & 0x80) != 0) {
+		if ((MAP_COLLISION_DATA[DW1_COLLISION_IDX(edgeTile + tile * 100)] & 0x80) != 0) {
 			return 1;
 		}
 	}

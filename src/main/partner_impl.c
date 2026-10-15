@@ -710,8 +710,13 @@ void setFoodTimer(int16_t type)
 				goto calculateTimer;
 			}
 
+#ifdef DW1_NATIVE
+			/* the bound first: the PS1 read hungerTimes[8] (energyCap) when i == 7 */
+			if (i == 7 || RAISE_DATA[type].hungerTimes[i + 1] == -1) {
+#else
 			if (RAISE_DATA[type].hungerTimes[i + 1] == -1 ||
 			    i == 7) {
+#endif
 				int32_t j;
 
 				for (j = 0; j < 8; j++) {
@@ -722,8 +727,12 @@ void setFoodTimer(int16_t type)
 						goto calculateTimer;
 					}
 
+#ifdef DW1_NATIVE
+					if (j == 7 || RAISE_DATA[type].hungerTimes[j + 1] == -1) {
+#else
 					if (RAISE_DATA[type].hungerTimes[j + 1] == -1 ||
 					    j == 7) {
+#endif
 						PARTNER_PARA.nextHungerHour =
 							RAISE_DATA[type]
 								.hungerTimes[0];

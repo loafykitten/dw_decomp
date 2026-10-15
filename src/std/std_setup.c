@@ -41,7 +41,11 @@ extern uint8_t CURRENT_SCREEN;
 extern char *STD_ARENA_TIMS[];
 extern char *STD_ARENA_MODELS[];
 extern char *STD_ARENA_COLLISIONS[];
+#ifdef DW1_NATIVE
+#define MAP_COLLISION_DATA ((int8_t *)DW1_MAP_COLLISION_DATA)
+#else
 extern int8_t MAP_COLLISION_DATA[];
+#endif
 
 void STD_removeArenaRenderer(void);
 void STD_initializeOpponent(int16_t type, int16_t slot, uint8_t tier);

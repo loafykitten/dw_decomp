@@ -1728,7 +1728,13 @@ void openShop(void)
 
 void allocateItemMenuBox(ItemMenuBox **box, int32_t bufSize, uint8_t rows, uint8_t x, uint8_t y, uint8_t w, uint8_t h)
 {
+#ifdef DW1_NATIVE
+	/* 0x20 is the PS1 size; natively the box is 40 bytes (its pointer), and six rows'
+	 * itemRow writes would reach the next allocation's size header. */
+	*box = (ItemMenuBox *)allocateArray(sizeof(ItemMenuBox));
+#else
 	*box = (ItemMenuBox *)allocateArray(0x20);
+#endif
 	(*box)->buf = allocateArray(bufSize);
 	(*box)->isOpen = 0;
 	(*box)->visibleRows = rows;
