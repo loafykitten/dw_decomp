@@ -80,8 +80,13 @@ void runMapHeadScript(int32_t section);
 void setupMap(int32_t param_1, int32_t param_2);
 void loadMap(uint16_t mapId);
 uint8_t *getScriptSection(uint8_t *script, int32_t section);
+#ifdef DW1_NATIVE
+/* The buffer is an address (file_queue.c takes a pointer); an int32_t would cut it natively. */
+#include <dw/file_queue.h>
+#else
 int32_t addFileReadRequestPath(char *path, int32_t buffer, uint8_t *isRunning,
                                void *callback, void *callbackParam);
+#endif
 
 static void *script_interp_text_order[] = {
 	_hasMove,
@@ -1848,8 +1853,12 @@ void scriptInstruction64to7E(op)
 			createNinjamonEffect();
 			break;
 		case 0x33:
+#ifdef DW1_NATIVE
+			addFileReadRequestPath(MAIN_D_80130394, BOSS_EFE_TMD_BUFFER, 0, 0, 0);
+#else
 			addFileReadRequestPath(MAIN_D_80130394,
 			                       (intptr_t)BOSS_EFE_TMD_BUFFER, 0, 0, 0);
+#endif
 			loadDynamicLibrary(EAB_REL, 0, 0, 0, 0);
 			readVBALLSection(5, 0x73);
 			loadMapSounds2(0x15);
