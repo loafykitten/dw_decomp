@@ -30,8 +30,16 @@
 #include <dw/version.h>
 #include <dw/world_object.h>
 
+#ifdef DW1_NATIVE
+/* Addresses of PS1 RAM, translated; held at pointer width. */
+#define DOOA_MMD_BUFFER		((intptr_t)DW1_PS1_ADDR(uint8_t *, 0x80020000))
+#define DOOA_SHARD_BUFFER	((intptr_t)DW1_PS1_ADDR(uint8_t *, 0x80044800))
+typedef intptr_t DooaAddr;
+#else
 #define DOOA_MMD_BUFFER		0x80020000
 #define DOOA_SHARD_BUFFER	0x80044800
+typedef int32_t DooaAddr;
+#endif
 #define DOOA_SHARD_BUFFER_SIZE	0x5dc0
 #define DOOA_ORDERING_TABLE_0	DW1_PS1_ADDR(GsOT_TAG *, 0x8008c000)
 #define DOOA_ORDERING_TABLE_1	DW1_PS1_ADDR(GsOT_TAG *, 0x8008e000)
@@ -107,7 +115,7 @@ void DOOA_renderDissolve(int32_t instanceId);
 int32_t lerp(long start, long end, int32_t t0, long t1, int32_t t);
 int32_t worldPosToScreenPos(SVECTOR *pos, DVECTOR *out);
 int32_t DOOA_hasIrisClosed(Entity *entity, int32_t startFrame, long endFrame, long frame);
-void DOOA_saveShardClut(int32_t buffer);
+void DOOA_saveShardClut(DooaAddr buffer);
 void DOOA_setOtherEntitiesVisible(int32_t restore);
 void DOOA_hideAllButPartner(void);
 void DOOA_getOrbitPosition(VECTOR *outRef, VECTOR *outPos, VECTOR *position, SVECTOR *rotation, int32_t distance, int32_t height);
@@ -122,9 +130,9 @@ void DOOA_fadeShardClut(int16_t *srcClut, void *unused, int16_t *dstClut, int32_
 int32_t DOOA_getStoredDigimonY(void);
 int32_t DOOA_updateShards(int32_t instanceId);
 int32_t DOOA_renderShards(int32_t instanceId);
-int32_t DOOA_initShardEffect(Entity *entity, intptr_t addr, int32_t size);
-void DOOA_saveEntityClut(int32_t buffer, Entity *entity);
-void DOOA_saveModelClut(int32_t buffer);
+DooaAddr DOOA_initShardEffect(Entity *entity, intptr_t addr, int32_t size);
+void DOOA_saveEntityClut(DooaAddr buffer, Entity *entity);
+void DOOA_saveModelClut(DooaAddr buffer);
 void renderDropShadow(Entity *entity);
 void EFECreateFlash(void);
 void setMapLayerEnabled(int32_t enabled);
@@ -634,7 +642,7 @@ int32_t DOOA_hasIrisClosed(Entity *entity, int32_t startFrame, long endFrame, lo
 	return result;
 }
 
-int32_t DOOA_initShardEffect(Entity *entity, intptr_t addr, int32_t size)
+DooaAddr DOOA_initShardEffect(Entity *entity, intptr_t addr, int32_t size)
 {
 	DooaShardEffect *effect = &DOOA_SHARD_EFFECT;
 
@@ -648,7 +656,7 @@ int32_t DOOA_initShardEffect(Entity *entity, intptr_t addr, int32_t size)
 	effect->entity = entity;
 	effect->shardBuffer = (void *)addr;
 	effect->shardWrite = effect->shardBuffer;
-	*(int32_t *)effect->shardWrite = 0;
+	*(TMD_P_TG4 **)effect->shardWrite = NULL;
 	effect->shardBytes = size;
 	effect->colorR = 0x50;
 	effect->colorG = 0x50;
@@ -658,7 +666,7 @@ int32_t DOOA_initShardEffect(Entity *entity, intptr_t addr, int32_t size)
 	return addr + size;
 }
 
-void DOOA_saveEntityClut(int32_t buffer, Entity *entity)
+void DOOA_saveEntityClut(DooaAddr buffer, Entity *entity)
 {
 	ModelComponent *model;
 	TMDModel *tmd;
@@ -667,25 +675,25 @@ void DOOA_saveEntityClut(int32_t buffer, Entity *entity)
 	model = getEntityModelComponent(entity->type, getEntityType(entity));
 	tmd = model->modelPtr;
 	setRECT(&rect, (model->clutPage & 0x3f) << 4, model->clutPage >> 6, 16, 24);
-	StoreImage(&rect, (u_long *)buffer);
+	StoreImage(&rect, (u_long *)(uintptr_t)buffer);
 	DrawSync(0);
 }
 
-void DOOA_saveModelClut(int32_t buffer)
+void DOOA_saveModelClut(DooaAddr buffer)
 {
 	RECT rect;
 
 	setRECT(&rect, 0, 488, 16, 24);
-	StoreImage(&rect, (u_long *)buffer);
+	StoreImage(&rect, (u_long *)(uintptr_t)buffer);
 	DrawSync(0);
 }
 
-void DOOA_saveShardClut(int32_t buffer)
+void DOOA_saveShardClut(DooaAddr buffer)
 {
 	RECT rect;
 
 	setRECT(&rect, 48, 488, 32, 24);
-	StoreImage(&rect, (u_long *)buffer);
+	StoreImage(&rect, (u_long *)(uintptr_t)buffer);
 	DrawSync(0);
 }
 
@@ -697,6 +705,14 @@ void DOOA_setOtherEntitiesVisible(int32_t restore)
 
 	if (restore == 0) {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			/* An empty slot: the PS1 read its isOnMap from low RAM and the restore below wrote
+			 * it back there; nothing else reads either (as MURD_setOtherEntitiesVisible). */
+			if (ENTITY_TABLE[i] == NULL) {
+				DOOA_SAVED_ENTITY_VISIBILITY[i] = 0;
+				continue;
+			}
+#endif
 			if ((ENTITY_TABLE[i] != (Entity *)&PARTNER_ENTITY) && (ENTITY_TABLE[i]->isOnMap != 0)) {
 				ENTITY_TABLE[i]->isOnMap = 0;
 				DOOA_SAVED_ENTITY_VISIBILITY[i] = 1;
@@ -706,6 +722,11 @@ void DOOA_setOtherEntitiesVisible(int32_t restore)
 		}
 	} else {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			if (ENTITY_TABLE[i] == NULL) {
+				continue;
+			}
+#endif
 			if (ENTITY_TABLE[i] != (Entity *)&PARTNER_ENTITY) {
 				ENTITY_TABLE[i]->isOnMap = DOOA_SAVED_ENTITY_VISIBILITY[i];
 			}
@@ -721,6 +742,12 @@ void DOOA_hideAllButPartner(void)
 		if (i == 1) {
 			continue;
 		}
+#ifdef DW1_NATIVE
+		/* an empty slot: the PS1 wrote low RAM, which nothing reads back */
+		if (ENTITY_TABLE[i] == NULL) {
+			continue;
+		}
+#endif
 		ENTITY_TABLE[i]->isOnMap = 0;
 	}
 }
@@ -1449,7 +1476,7 @@ int32_t DOOA_renderShards(int32_t instanceId)
 	cursor = (intptr_t)effect->shardBuffer;
 	model = getEntityModelComponent(effect->entity->type, 3);
 
-	while (*(int32_t *)cursor != 0) {
+	while (*(TMD_P_TG4 **)cursor != NULL) {
 		switch ((*(TMD_P_TG4 **)cursor)->cd) {
 		case GPU_COM_TG3:
 		case GPU_COM_TG3 | 2:

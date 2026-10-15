@@ -25,15 +25,22 @@
 
 #include "common.h"
 
+#ifdef DW1_NATIVE
+#define EVL_MMD_BUFFER	((intptr_t)DW1_PS1_ADDR(uint8_t *, 0x80020000))
+/* Native buffer addresses are pointer wide; the PS1 build keeps its 32-bit words. */
+typedef intptr_t EvlAddr;
+#else
 #define EVL_MMD_BUFFER	0x80020000
+typedef int32_t EvlAddr;
+#endif
 
 typedef struct {
 	int16_t timer;
 	int16_t primCount;
-	int32_t centers;
+	EvlAddr centers;
 	int32_t *model;
-	int32_t vertices;
-	int32_t primitives;
+	EvlAddr vertices;
+	EvlAddr primitives;
 	int16_t centerCount;
 	int16_t bone;
 } EvlShardSet;
@@ -69,7 +76,7 @@ extern int16_t EVL_D_800679E4[];
 extern RGB8 MAIN_D_801349E8;
 extern SVECTOR MAIN_D_801349EC;
 extern uint8_t CURRENT_SCREEN;
-extern int32_t MAIN_D_801349E4;
+extern EvlAddr MAIN_D_801349E4;
 extern VECTOR EVL_D_80068908;
 int32_t getMapSoundId(int32_t mapId);
 void EFECreateFlash(void);
@@ -93,18 +100,18 @@ void EVL_brightenDigimonClut(int16_t *clut, Entity *entity, int16_t *dst, int32_
 void setDigimonRaised(int32_t type);
 int32_t lerp(int32_t start, int32_t end, int32_t tMin, int32_t tMax, int32_t t);
 int32_t worldPosToScreenPos(SVECTOR *worldPos, DVECTOR *screenPos);
-void EVL_setScratchTop(int32_t size);
+void EVL_setScratchTop(EvlAddr size);
 void EVL_resetParticles(void);
 void EVL_resetSparks(void);
-void EVL_storeClutBank1(int32_t buffer);
+void EVL_storeClutBank1(EvlAddr buffer);
 void EVL_releaseAllParticles(void);
 void EVL_tickParticle(int32_t id);
-void EVL_storeDigimonClut(int32_t buffer, Entity *entity);
-void EVL_storeClutBank0(int32_t buffer);
+void EVL_storeDigimonClut(EvlAddr buffer, Entity *entity);
+void EVL_storeClutBank0(EvlAddr buffer);
 void EVL_setOtherEntitiesVisible(int32_t restore);
 int32_t EVL_spawnParticle(VECTOR *position, RGB8 *color);
 void EVL_renderParticle(int32_t id);
-int32_t EVL_initShardSets(int32_t base);
+EvlAddr EVL_initShardSets(EvlAddr base);
 void EVL_tickEvoSequence(int32_t instanceId);
 void EVL_fadeClutBank0(int16_t *srcClut, void *entity, int16_t *dstClut, int32_t startFrame, int32_t endFrame, int32_t frame);
 void EVL_fadeClutBank1(int16_t *srcClut, void *entity, int16_t *dstClut, int32_t startFrame, int32_t endFrame, int32_t frame);
@@ -196,7 +203,7 @@ static void *evl_functions[] = {
 #endif
 };
 
-int32_t MAIN_D_801349E4 = EVL_MMD_BUFFER;
+EvlAddr MAIN_D_801349E4 = EVL_MMD_BUFFER;
 RGB8 MAIN_D_801349E8 = { 0x0a, 0xff, 0x0a };
 SVECTOR MAIN_D_801349EC = { 0 };
 int8_t MAIN_D_801349F4 = 1;
@@ -212,7 +219,7 @@ int32_t MAIN_D_801351FC;
 int32_t MAIN_D_80135200;
 int32_t MAIN_D_80135204;
 EvlShardSet *MAIN_D_80135208;
-int32_t MAIN_D_8013520C;
+EvlAddr MAIN_D_8013520C;
 uint8_t *MAIN_D_80135210;
 EvlModelVertex *MAIN_D_80135214;
 int16_t MAIN_D_80135218[3];
@@ -266,7 +273,7 @@ int8_t EVL_D_80063F28[18] = {
 };
 // clang-format on
 
-void EVL_storeDigimonClut(int32_t buffer, Entity *entity)
+void EVL_storeDigimonClut(EvlAddr buffer, Entity *entity)
 {
 	ModelComponent *model;
 	TMDModel *tmd;
@@ -280,7 +287,7 @@ void EVL_storeDigimonClut(int32_t buffer, Entity *entity)
 	DrawSync(0);
 }
 
-void EVL_storeClutBank0(int32_t buffer)
+void EVL_storeClutBank0(EvlAddr buffer)
 {
 	RECT rect;
 
@@ -289,7 +296,7 @@ void EVL_storeClutBank0(int32_t buffer)
 	DrawSync(0);
 }
 
-void EVL_storeClutBank1(int32_t buffer)
+void EVL_storeClutBank1(EvlAddr buffer)
 {
 	RECT rect;
 
@@ -298,7 +305,13 @@ void EVL_storeClutBank1(int32_t buffer)
 	DrawSync(0);
 }
 
-int32_t EVL_initShardSets(int32_t base)
+#ifdef DW1_NATIVE
+/* The native record is wider than the PS1's 24 bytes and holds pointer-width fields, so it
+ * can't live in the PS1-sized byte array EVL_D_80065FA0; it gets its own aligned storage. */
+static EvlShardSet EVL_shardSets[30];
+#endif
+
+EvlAddr EVL_initShardSets(EvlAddr base)
 {
 	int32_t i;
 
@@ -306,8 +319,13 @@ int32_t EVL_initShardSets(int32_t base)
 		base += 4 - (base & 3L);
 	}
 
+#ifdef DW1_NATIVE
+	MAIN_D_80135208 = EVL_shardSets;
+	base += sizeof(EvlShardSet) * 30;
+#else
 	MAIN_D_80135208 = (EvlShardSet *)base;
 	base += 0x2d0;
+#endif
 	for (i = 0; i < 30; i++) {
 		MAIN_D_80135208[i].timer = -1;
 	}
@@ -315,7 +333,7 @@ int32_t EVL_initShardSets(int32_t base)
 	return base;
 }
 
-void EVL_setScratchTop(int32_t size)
+void EVL_setScratchTop(EvlAddr size)
 {
 	if ((size & 3) != 0) {
 		size += 4 - (size & 3L);
@@ -341,6 +359,12 @@ void EVL_resetSparks(void)
 		EVL_D_80068F84[i].bone = -1;
 	}
 }
+
+#ifdef DW1_NATIVE
+#define EVL_TIMER ((intptr_t)data->timer)
+#else
+#define EVL_TIMER ((intptr_t)*(uint8_t **)&data->timer)
+#endif
 
 void EVL_tickEvoSequence(int32_t instanceId)
 {
@@ -454,16 +478,16 @@ shards:
 					EFECreateFlash();
 				}
 			}
-		} else if ((intptr_t)*(uint8_t **)&data->timer >= 0x9b) {
-			if ((intptr_t)*(uint8_t **)&data->timer < 0x11c) {
+		} else if (EVL_TIMER >= 0x9b) {
+			if (EVL_TIMER < 0x11c) {
 				goto shards;
 			}
 		}
-		if ((intptr_t)*(uint8_t **)&data->timer < 0xcc) {
+		if (EVL_TIMER < 0xcc) {
 			tmp = DIGIMON_DATA[partner->digimonEntity.entity.type].radius;
 			size = DIGIMON_DATA[partner->digimonEntity.entity.type].height;
 			height = DIGIMON_DATA[partner->digimonEntity.entity.type].height;
-		} else if (((intptr_t)*(uint8_t **)&data->timer >= 0xcc) && ((intptr_t)*(uint8_t **)&data->timer < 0x108)) {
+		} else if ((EVL_TIMER >= 0xcc) && (EVL_TIMER < 0x108)) {
 			scale = &partner->digimonEntity.entity.posData->scale;
 			rRatio = (DIGIMON_DATA[data->digimonId].radius << 12) / DIGIMON_DATA[partner->digimonEntity.entity.type].radius;
 			hRatio = (DIGIMON_DATA[data->digimonId].height << 12) / DIGIMON_DATA[partner->digimonEntity.entity.type].height;
@@ -473,7 +497,7 @@ shards:
 			tmp = lerp(DIGIMON_DATA[partner->digimonEntity.entity.type].radius, DIGIMON_DATA[data->digimonId].radius, 0xcc, 0x108, data->timer);
 			size = lerp(DIGIMON_DATA[partner->digimonEntity.entity.type].height, DIGIMON_DATA[data->digimonId].height, 0xcc, 0x108, data->timer);
 			height = lerp(DIGIMON_DATA[partner->digimonEntity.entity.type].height, DIGIMON_DATA[data->digimonId].height, 0xcc, 0x108, data->timer);
-		} else if ((intptr_t)*(uint8_t **)&data->timer >= 0x108) {
+		} else if (EVL_TIMER >= 0x108) {
 			tmp = DIGIMON_DATA[data->digimonId].radius;
 			size = DIGIMON_DATA[data->digimonId].height;
 			height = DIGIMON_DATA[data->digimonId].height;
@@ -482,7 +506,7 @@ shards:
 			if (data->timer >= 0xc3) {
 				MAIN_D_801351F8 += 0x16;
 			} else {
-				MAIN_D_801351F8 += lerp(0, 0x16, 0xa4, 0xc2, (intptr_t)*(uint8_t **)&data->timer);
+				MAIN_D_801351F8 += lerp(0, 0x16, 0xa4, 0xc2, EVL_TIMER);
 			}
 			rot = MAIN_D_801349EC;
 			rot.vy = MAIN_D_801351F8 + partner->digimonEntity.entity.posData->rotation.vy;
@@ -683,6 +707,14 @@ void EVL_setOtherEntitiesVisible(int32_t restore)
 	MAIN_D_801349F4 = restore;
 	if (restore == 0) {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			/* An empty slot: the PS1 read its isOnMap from low RAM and the restore below wrote
+			 * it back there; nothing else reads either (as MURD_setOtherEntitiesVisible). */
+			if (ENTITY_TABLE[i] == NULL) {
+				EVL_D_80068938[i] = 0;
+				continue;
+			}
+#endif
 			if ((ENTITY_TABLE[i] != (Entity *)&PARTNER_ENTITY) && (ENTITY_TABLE[i]->isOnMap != 0)) {
 				ENTITY_TABLE[i]->isOnMap = 0;
 				EVL_D_80068938[i] = 1;
@@ -692,6 +724,11 @@ void EVL_setOtherEntitiesVisible(int32_t restore)
 		}
 	} else {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			if (ENTITY_TABLE[i] == NULL) {
+				continue;
+			}
+#endif
 			if (ENTITY_TABLE[i] != (Entity *)&PARTNER_ENTITY) {
 				ENTITY_TABLE[i]->isOnMap = EVL_D_80068938[i];
 			}
@@ -883,7 +920,7 @@ void EVL_renderShardSet(int32_t index)
 {
 	ModelComponent *model;
 	EvlShardSet *entry;
-	int32_t shards;
+	EvlAddr shards;
 	int32_t count;
 
 	entry = &MAIN_D_80135208[index];
@@ -1004,14 +1041,14 @@ int32_t EVL_buildShardSet(Entity *entity, int32_t objIndex, int32_t bone)
 	TMDModel *tmd;
 	TMDModel *header;
 	struct TMD_STRUCT *objects;
-	int32_t outStart;
+	EvlAddr outStart;
 	SVECTOR tmp;
 	MATRIX m1;
 	int32_t slot;
 	SVECTOR *src;
 	int32_t i;
 	MATRIX m2;
-	int32_t prim;
+	EvlAddr prim;
 	int32_t j;
 	SVECTOR *va;
 	SVECTOR *vb;
@@ -1022,10 +1059,10 @@ int32_t EVL_buildShardSet(Entity *entity, int32_t objIndex, int32_t bone)
 	SVECTOR p2;
 	SVECTOR p3;
 	SVECTOR center;
-	int32_t tri;
-	int32_t quad;
+	EvlAddr tri;
+	EvlAddr quad;
 	struct TMD_STRUCT *obj;
-	int32_t out;
+	EvlAddr out;
 	EvlShardSet *entry;
 
 	out = MAIN_D_8013520C;

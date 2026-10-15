@@ -78,11 +78,21 @@ extern int16_t STD_INTRO_STATS_DATA[6];
 #define STD_INTRO_STATS_DATA STD_D_8007B9BC
 #endif
 extern StdUnkB9D0 STD_D_8007B9D0;
+#ifdef DW1_NATIVE
+/* The camera-intro curves are 22 entries each, which the PS1 laid out as two adjacent arrays
+ * (B9EC then B9FC, BA9C then BAAC) and indexed across; natively one array holds each. */
+extern int32_t STD_D_8007B9EC[22];
+#define STD_D_8007B9FC (STD_D_8007B9EC + 4)
+extern int32_t STD_D_8007BA44[];
+extern int32_t STD_D_8007BA9C[22];
+#define STD_D_8007BAAC (STD_D_8007BA9C + 4)
+#else
 extern int32_t STD_D_8007B9EC[4];
 extern int32_t STD_D_8007B9FC[];
 extern int32_t STD_D_8007BA44[];
 extern int32_t STD_D_8007BA9C[4];
 extern int32_t STD_D_8007BAAC[];
+#endif
 extern StdUnkBAF4 STD_BRACKET_SLOTS[8];
 extern StdUnkBB64 STD_BRACKET_PROJECTILES[8];
 extern uint8_t STD_BATTLE_START_TEXT_PIECES[155][20];

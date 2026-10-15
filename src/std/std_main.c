@@ -250,7 +250,11 @@ void STD_removeIntroStats(int32_t i);
 void STD_removePlayerMarker(void);
 int32_t STD_getDigitCount(int32_t value);
 void STD_initializePlayerMarker(void);
+#ifdef DW1_NATIVE
+int16_t STD_getEntityIndex(Entity *entity, int16_t nativeFallback);
+#else
 int16_t STD_getEntityIndex(Entity *entity);
+#endif
 int16_t STD_getEntityIndex2(Entity *entity);
 void STD_tickDigimonSenile(DigimonEntity *digimon, FighterData *fighter);
 void STD_removeBracket(int16_t mode);
@@ -1579,7 +1583,13 @@ void STD_placePlayer1(int16_t which)
 	startAnimation(ENTITY_TABLE[1], 0x21);
 }
 
+#ifdef DW1_NATIVE
+/* No match returns the caller's leftover v0 on the PS1 (docs/phase5-returns-audit.md): the X
+ * just chosen in STD_placePlayer2, GS_VIEWPOINT.vpy in STD_runIntro. */
+int16_t STD_getEntityIndex(Entity *entity, int16_t nativeFallback)
+#else
 int16_t STD_getEntityIndex(Entity *entity)
+#endif
 {
 	int32_t i;
 
@@ -1588,6 +1598,9 @@ int16_t STD_getEntityIndex(Entity *entity)
 			return i;
 		}
 	}
+#ifdef DW1_NATIVE
+	return nativeFallback;
+#endif
 }
 
 void STD_placePlayer2(int16_t which)
@@ -1600,7 +1613,11 @@ void STD_placePlayer2(int16_t which)
 	} else {
 		x = -0x9c4;
 	}
+#ifdef DW1_NATIVE
+	id = STD_getEntityIndex(STD_OPPONENT_ENTITY, x);
+#else
 	id = STD_getEntityIndex(STD_OPPONENT_ENTITY);
+#endif
 	setEntityPosition(id, x, 0, 0);
 	setEntityRotation(id, 0, 0xc00, 0);
 	startAnimation(STD_OPPONENT_ENTITY, 0x21);
@@ -1909,7 +1926,11 @@ void STD_runIntro(int16_t which)
 #if !VERSION_IS(US)
 	id = STD_getEntityIndex(ENTITY_TABLE[1]);
 #else
+#ifdef DW1_NATIVE
+	idn = STD_getEntityIndex(ENTITY_TABLE[1], (int16_t)GS_VIEWPOINT.vpy);
+#else
 	idn = STD_getEntityIndex(ENTITY_TABLE[1]);
+#endif
 	id = idn;
 #endif
 	STD_addIntroText(ENTITY_TABLE[1], id);
@@ -1941,7 +1962,11 @@ void STD_runIntro(int16_t which)
 #if !VERSION_IS(US)
 	id = STD_getEntityIndex(STD_OPPONENT_ENTITY);
 #else
+#ifdef DW1_NATIVE
+	idn = STD_getEntityIndex(STD_OPPONENT_ENTITY, (int16_t)GS_VIEWPOINT.vpy);
+#else
 	idn = STD_getEntityIndex(STD_OPPONENT_ENTITY);
+#endif
 	id = idn;
 #endif
 	STD_addIntroText(STD_OPPONENT_ENTITY, id);
@@ -2773,7 +2798,12 @@ void STD_tickCameraIntro(void)
 	rot = MAIN_D_80134840;
 	rot.vy = STD_D_8007B9BC[7];
 	STD_D_8007B9BC[8] = processSomeArenaArrays(0x16, p[0], STD_D_8007A41C, STD_D_8007B9EC, STD_D_8007BA44);
+#ifdef DW1_NATIVE
+	/* p[6] is the 32-bit slot at B9BC + 0x18, which is STD_D_8007B9D0.target. */
+	STD_setViewpointFromBone(STD_D_8007B9D0.target, &off, &rot, STD_D_8007B9BC[8]);
+#else
 	STD_setViewpointFromBone(*(Entity **)&p[6], &off, &rot, STD_D_8007B9BC[8]);
+#endif
 	GS_VIEWPOINT.vry = (-DIGIMON_DATA[STD_D_8007B9D0.target->type].height * 2) / 3;
 	GS_VIEWPOINT.vpy = -processSomeArenaArrays(0x16, p[0], STD_D_8007A41C, STD_D_8007BA9C, STD_D_8007BA44);
 	p[0]++;
@@ -4994,7 +5024,13 @@ int32_t STD_handlePartnerMoveCommand(DigimonEntity *digimon, DigimonEntity *targ
 		switch (COMBAT_DATA_PTR->player.currentCommand[0]) {
 		case 6:
 			handleBattleIdle(digimon, &digimon->stats, fighter->flags);
-			entityLookAtLocation(&digimon->entity, (VECTOR *)((char *)ENTITY_TABLE[COMBAT_DATA_PTR->player.entityIds[fighter->targetId]]->posData + 0x78));
+			entityLookAtLocation(&digimon->entity, 
+#ifdef DW1_NATIVE
+				&ENTITY_TABLE[COMBAT_DATA_PTR->player.entityIds[fighter->targetId]]->posData->location
+#else
+				(VECTOR *)((char *)ENTITY_TABLE[COMBAT_DATA_PTR->player.entityIds[fighter->targetId]]->posData + 0x78)
+#endif
+			);
 			fighter->hasCollidedWhileDistanceCmd = 0;
 			return 1;
 		case 5:
@@ -5009,7 +5045,13 @@ int32_t STD_handlePartnerMoveCommand(DigimonEntity *digimon, DigimonEntity *targ
 			} else {
 				fighter->hasCollidedWhileDistanceCmd = 0;
 				handleBattleIdle(digimon, &digimon->stats, fighter->flags);
-				entityLookAtLocation(&digimon->entity, (VECTOR *)((char *)target->entity.posData + 0x78));
+				entityLookAtLocation(&digimon->entity, 
+#ifdef DW1_NATIVE
+				&target->entity.posData->location
+#else
+				(VECTOR *)((char *)target->entity.posData + 0x78)
+#endif
+			);
 			}
 
 			return 1;
@@ -5488,6 +5530,11 @@ int16_t STD_getEntityIndex2(Entity *entity)
 			return i;
 		}
 	}
+#ifdef DW1_NATIVE
+	/* No match returns the caller's leftover v0 on the PS1: COMBAT_DATA_PTR, 0x8013D640
+	 * (docs/phase5-returns-audit.md); its only caller stores the low byte. */
+	return (int16_t)0xD640;
+#endif
 }
 
 void STD_clearBlockedAttacks(FighterData *fighter)
@@ -6599,6 +6646,9 @@ void STD_applyChargeRequirement(DigimonEntity *digimon, FighterData *fighter, in
 void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter)
 {
 	int16_t tech;
+#ifdef DW1_NATIVE
+	int32_t techKnown = 0;
+#endif
 
 	if (NO_AI_FLAG != 0) {
 		if (FINISHING_ENTITY != &digimon->entity) {
@@ -6611,6 +6661,9 @@ void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterD
 		}
 	} else {
 		tech = entityGetTechFromAnim(&digimon->entity, fighter->queuedAnim);
+#ifdef DW1_NATIVE
+		techKnown = 1;
+#endif
 		if (tech >= 0x3a && tech < 0x71) {
 			NO_AI_FLAG = 1;
 		}
@@ -6641,6 +6694,13 @@ void STD_startQueuedMove(DigimonEntity *digimon, DigimonEntity *target, FighterD
 			entityLookAtLocation(&digimon->entity, &target->entity.posData->location);
 		}
 	}
+#ifdef DW1_NATIVE
+	/* Reached with a finisher already running and its timer spent: `tech` was never set, and
+	 * the PS1 read whatever its register held. Not reproduced; stop instead. */
+	if (!techKnown) {
+		dw1_native_fatal("STD_startQueuedMove: finisher move with tech never set");
+	}
+#endif
 	if ((MOVE_DATA[tech].unk3 & 2) != 0) {
 		if (&digimon->entity == ENTITY_TABLE[1]) {
 			FLEE_DISABLED[1] = 0x6e;

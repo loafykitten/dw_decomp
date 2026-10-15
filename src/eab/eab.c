@@ -211,7 +211,13 @@ void EAB_initializeRings(void)
 {
 	int32_t i;
 
+#ifdef DW1_NATIVE
+	/* The table has 3 entries; the PS1 loop ran on over the 15 8-byte slots after it
+	 * (EAB_D_800617E8 and the start of EAB_D_80061800), natively other globals. */
+	for (i = 0; i < 3; i++) {
+#else
 	for (i = 0; i < 18; i++) {
+#endif
 		EAB_D_800617D0[i].timer = -1;
 	}
 }
@@ -494,6 +500,14 @@ void EAB_setEntitiesVisible(int32_t enabled)
 	MAIN_D_80134C48 = enabled;
 	if (enabled == 0) {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			/* An empty slot: the PS1 read its isOnMap from low RAM and the restore below wrote
+			 * it back there; nothing else reads either (as MURD_setOtherEntitiesVisible). */
+			if (ENTITY_TABLE[i] == NULL) {
+				EAB_D_80061A04[i] = 0;
+				continue;
+			}
+#endif
 			if ((i != 2) && (ENTITY_TABLE[i]->isOnMap != 0)) {
 				ENTITY_TABLE[i]->isOnMap = 0;
 				EAB_D_80061A04[i] = 1;
@@ -503,6 +517,11 @@ void EAB_setEntitiesVisible(int32_t enabled)
 		}
 	} else {
 		for (i = 0; i < ENTITY_MAX; i++) {
+#ifdef DW1_NATIVE
+			if (ENTITY_TABLE[i] == NULL) {
+				continue;
+			}
+#endif
 			if (i != 2) {
 				ENTITY_TABLE[i]->isOnMap = EAB_D_80061A04[i];
 			}

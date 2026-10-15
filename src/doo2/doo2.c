@@ -26,6 +26,19 @@ typedef struct {
 	int16_t frame;
 } Doo2Shard;
 
+#ifdef DW1_NATIVE
+/*
+ * The loaded TMD's object table is file data (seven 32-bit words per record), whose address
+ * fields hold encoded 32-bit pointers once mapped: the native TMD record, read through
+ * DW1_TMD_ADDR, as the EVL overlay does. A struct of pointers would be 40 bytes.
+ */
+typedef struct TMD_STRUCT Doo2ModelDesc;
+#define DOO2_DESC_SOURCE_VERTICES(m)	((SVECTOR *)DW1_TMD_ADDR((m)->vertop))
+#define DOO2_DESC_VERTEX_COUNT(m)	((m)->vern)
+#define DOO2_DESC_WORLD_VERTICES(m)	((SVECTOR *)DW1_TMD_ADDR((m)->nortop))
+#define DOO2_DESC_PRIMITIVES(m)		((intptr_t)DW1_TMD_ADDR((m)->primtop))
+#define DOO2_DESC_PRIMITIVE_COUNT(m)	((m)->primn)
+#else
 typedef struct {
 	SVECTOR *sourceVertices;
 	uint32_t vertexCount;
@@ -35,10 +48,16 @@ typedef struct {
 	uint32_t primitiveCount;
 	int32_t unk18;
 } Doo2ModelDesc;
+#define DOO2_DESC_SOURCE_VERTICES(m)	((m)->sourceVertices)
+#define DOO2_DESC_VERTEX_COUNT(m)	((m)->vertexCount)
+#define DOO2_DESC_WORLD_VERTICES(m)	((m)->worldVertices)
+#define DOO2_DESC_PRIMITIVES(m)		((m)->primitives)
+#define DOO2_DESC_PRIMITIVE_COUNT(m)	((m)->primitiveCount)
+#endif
 
 void addScreenPolyFT3(void *prim, SVECTOR *v0, SVECTOR *v1, SVECTOR *v2);
 int32_t addScreenPolyFT4(POLY_FT4 *poly, SVECTOR *v0, SVECTOR *v1, SVECTOR *v2, SVECTOR *v3);
-void DOO2_setScratchTop(long size);
+void DOO2_setScratchTop(Doo2Addr size);
 void DOO2_tickShardSet(int32_t slot);
 void DOO2_releaseShardSet(int32_t slot);
 void DOO2_renderTriShard(Doo2Shard *drift, int32_t unused1, int16_t speed, int16_t unused3, ModelComponent *model);
@@ -87,7 +106,7 @@ RECT MAIN_D_80134B98 = { -8, -8, 16, 16 };
 Doo2EggIcons EGG_ICONS = { { 0, 2, 3, 1 } };
 RECT MAIN_D_80134BA4 = { -8, -8, 16, 16 };
 
-int32_t MAIN_D_80135310;
+Doo2Addr MAIN_D_80135310;
 uint8_t *MAIN_D_80135314;
 Doo2ModelVertex *MAIN_D_80135318;
 int16_t MAIN_D_8013531C[3];
@@ -162,7 +181,7 @@ GsSPRITE DOO2_EGG_CURSOR_SPRITE = {
 };
 // clang-format on
 
-void DOO2_setScratchTop(long size)
+void DOO2_setScratchTop(Doo2Addr size)
 {
 	if ((size & 3) != 0) {
 		size += 4 - (size & 3);
@@ -175,7 +194,7 @@ void DOO2_renderShardSet(int32_t index)
 	ModelComponent params;
 	ModelComponent *paramsPtr;
 	Doo2ShardSet *entry;
-	int32_t shards;
+	Doo2Addr shards;
 	int32_t count;
 
 	entry = &DOO2_SHARD_SETS[index];
@@ -351,21 +370,21 @@ void DOO2_renderEggIcons(void)
 	GsSortSprite(&DOO2_EGG_CURSOR_SPRITE, ACTIVE_ORDERING_TABLE, pri);
 }
 
-void DOO2_saveModelClut(u_long pixels)
+void DOO2_saveModelClut(Doo2UAddr pixels)
 {
 	RECT rect;
 
 	setRECT(&rect, 32, 488, 16, 24);
-	StoreImage(&rect, (u_long *)pixels);
+	StoreImage(&rect, (u_long *)(uintptr_t)pixels);
 	DrawSync(0);
 }
 
-void DOO2_saveClutTile(u_long pixels, int32_t tile)
+void DOO2_saveClutTile(Doo2UAddr pixels, int32_t tile)
 {
 	RECT rect;
 
 	setRECT(&rect, (tile & 0x3f) * 16, tile >> 6, 16, 4);
-	StoreImage(&rect, (u_long *)pixels);
+	StoreImage(&rect, (u_long *)(uintptr_t)pixels);
 	DrawSync(0);
 }
 
@@ -584,7 +603,7 @@ void DOO2_renderSparkStreak(int32_t *pos, SVECTOR *rot)
 	addScreenPolyFT3(prim, &b, &origin, &a);
 }
 
-void DOO2_resetShardSets(int32_t size)
+void DOO2_resetShardSets(Doo2Addr size)
 {
 	int32_t i;
 
@@ -594,14 +613,14 @@ void DOO2_resetShardSets(int32_t size)
 	DOO2_setScratchTop(size);
 }
 
-int32_t DOO2_buildShardSet(VECTOR *offset, u_long modelList, int32_t modelIndex)
+int32_t DOO2_buildShardSet(VECTOR *offset, Doo2UAddr modelList, int32_t modelIndex)
 {
 	Doo2ShardSet *anim;
 	int32_t slot;
-	u_long tmd;
-	u_long header;
+	Doo2UAddr tmd;
+	Doo2UAddr header;
 	Doo2ModelDesc *objects;
-	int32_t outStart;
+	Doo2Addr outStart;
 	SVECTOR *src;
 	int32_t i;
 	uint8_t *prim;
@@ -618,7 +637,7 @@ int32_t DOO2_buildShardSet(VECTOR *offset, u_long modelList, int32_t modelIndex)
 	TMD_P_TG3 *tri;
 	TMD_P_TG4 *quad;
 	Doo2ModelDesc *model;
-	int32_t out;
+	Doo2Addr out;
 
 	out = MAIN_D_80135310;
 	tmd = modelList;
@@ -637,8 +656,8 @@ int32_t DOO2_buildShardSet(VECTOR *offset, u_long modelList, int32_t modelIndex)
 
 	anim = &DOO2_SHARD_SETS[slot];
 	outStart = out;
-	src = model->sourceVertices;
-	for (i = 0; i < model->vertexCount; i++) {
+	src = DOO2_DESC_SOURCE_VERTICES(model);
+	for (i = 0; i < DOO2_DESC_VERTEX_COUNT(model); i++) {
 		((Doo2ModelVertex *)out)->vx = src->vx + offset->vx;
 		((Doo2ModelVertex *)out)->vy = src->vy + offset->vy;
 		((Doo2ModelVertex *)out)->vz = src->vz + offset->vz;
@@ -647,21 +666,21 @@ int32_t DOO2_buildShardSet(VECTOR *offset, u_long modelList, int32_t modelIndex)
 	}
 
 	anim->timer = 0;
-	anim->primitiveCount = model->primitiveCount;
+	anim->primitiveCount = DOO2_DESC_PRIMITIVE_COUNT(model);
 	anim->centers = out;
 	anim->vertices = outStart;
-	anim->primitives = model->primitives;
-	anim->centerCount = model->primitiveCount;
+	anim->primitives = DOO2_DESC_PRIMITIVES(model);
+	anim->centerCount = DOO2_DESC_PRIMITIVE_COUNT(model);
 	addObject(0x609, slot, DOO2_tickShardSet, DOO2_renderShardSet);
 
-	prim = (uint8_t *)model->primitives;
-	for (j = 0; j < model->primitiveCount; j++) {
+	prim = (uint8_t *)DOO2_DESC_PRIMITIVES(model);
+	for (j = 0; j < DOO2_DESC_PRIMITIVE_COUNT(model); j++) {
 		switch (((int8_t *)prim)[3]) {
 		case 0x34:
 			tri = (TMD_P_TG3 *)prim;
-			va = &model->worldVertices[tri->n0];
-			vb = &model->worldVertices[tri->n1];
-			vc = &model->worldVertices[tri->n2];
+			va = &DOO2_DESC_WORLD_VERTICES(model)[tri->n0];
+			vb = &DOO2_DESC_WORLD_VERTICES(model)[tri->n1];
+			vc = &DOO2_DESC_WORLD_VERTICES(model)[tri->n2];
 			p0 = *va;
 			p1 = *vb;
 			p2 = *vc;
@@ -680,10 +699,10 @@ int32_t DOO2_buildShardSet(VECTOR *offset, u_long modelList, int32_t modelIndex)
 			break;
 		case 0x3c:
 			quad = (TMD_P_TG4 *)prim;
-			va = &model->worldVertices[quad->n0];
-			vb = &model->worldVertices[quad->n1];
-			vc = &model->worldVertices[quad->n2];
-			vd = &model->worldVertices[quad->n3];
+			va = &DOO2_DESC_WORLD_VERTICES(model)[quad->n0];
+			vb = &DOO2_DESC_WORLD_VERTICES(model)[quad->n1];
+			vc = &DOO2_DESC_WORLD_VERTICES(model)[quad->n2];
+			vd = &DOO2_DESC_WORLD_VERTICES(model)[quad->n3];
 			p0 = *va;
 			p1 = *vb;
 			p2 = *vc;

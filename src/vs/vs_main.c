@@ -797,6 +797,9 @@ void VS_applyChargeRequirement(DigimonEntity *digimon, FighterData *fighter, int
 void VS_startFighterMove(DigimonEntity *digimon, DigimonEntity *target, FighterData *fighter)
 {
 	int16_t tech;
+#ifdef DW1_NATIVE
+	int32_t techKnown = 0;
+#endif
 
 	if (NO_AI_FLAG != 0) {
 		if (FINISHING_ENTITY != &digimon->entity) {
@@ -809,6 +812,9 @@ void VS_startFighterMove(DigimonEntity *digimon, DigimonEntity *target, FighterD
 		}
 	} else {
 		tech = entityGetTechFromAnim(&digimon->entity, fighter->queuedAnim);
+#ifdef DW1_NATIVE
+		techKnown = 1;
+#endif
 		if (tech >= 0x3a && tech < 0x71) {
 			NO_AI_FLAG = 1;
 		}
@@ -837,6 +843,13 @@ void VS_startFighterMove(DigimonEntity *digimon, DigimonEntity *target, FighterD
 			entityLookAtLocation(&digimon->entity, &target->entity.posData->location);
 		}
 	}
+#ifdef DW1_NATIVE
+	/* Reached with a finisher already running and its timer spent: `tech` was never set, and
+	 * the PS1 read whatever its register held. Not reproduced; stop instead. */
+	if (!techKnown) {
+		dw1_native_fatal("VS_startFighterMove: finisher move with tech never set");
+	}
+#endif
 	if ((MOVE_DATA[tech].unk3 & 2) != 0) {
 		if (&digimon->entity == ENTITY_TABLE[1]) {
 			FLEE_DISABLED[1] = 0x6e;

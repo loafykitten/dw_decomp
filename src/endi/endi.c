@@ -17,8 +17,14 @@ int32_t lerp(int32_t a, int32_t b, int32_t c, int32_t d, int32_t t);
 void renderFXParticle(SVECTOR *p, int32_t a, RGB8 *c);
 void calculateBoneMatrix(Entity *entity, int32_t b, MATRIX *m);
 
+#ifdef DW1_NATIVE
+/* The CLUT address is a pointer natively (a u_long is 32 bits). */
+static void ENDI_downloadClut(u_long *clut);
+static void ENDI_setClutStp(u_long *clut);
+#else
 static void ENDI_downloadClut(u_long clut);
 static void ENDI_setClutStp(u_long clut);
+#endif
 static void ENDI_setModelSemiTrans(Entity *entity, int32_t arg1);
 static void ENDI_updateEnding(int32_t objectId);
 static void ENDI_renderEndingObject(int32_t objectId);
@@ -68,7 +74,11 @@ static void *const endi_functions[] = {
 #endif
 };
 
+#ifdef DW1_NATIVE
+static void ENDI_setClutStp(u_long *clut)
+#else
 static void ENDI_setClutStp(u_long clut)
+#endif
 {
 	int32_t i;
 	RECT rect;
@@ -97,17 +107,29 @@ static void ENDI_setClutStp(u_long clut)
 	}
 
 	setRECT(&rect, 0, 488, 16, 24);
+#ifdef DW1_NATIVE
+	LoadImage(&rect, clut);
+#else
 	LoadImage(&rect, (u_long *)clut);
+#endif
 
 	DrawSync(0);
 }
 
+#ifdef DW1_NATIVE
+static void ENDI_downloadClut(u_long *clut)
+#else
 static void ENDI_downloadClut(u_long clut)
+#endif
 {
 	RECT rect;
 
 	setRECT(&rect, 0, 488, 16, 24);
+#ifdef DW1_NATIVE
+	StoreImage(&rect, clut);
+#else
 	StoreImage(&rect, (u_long *)clut);
+#endif
 
 	DrawSync(0);
 }
@@ -420,8 +442,13 @@ int32_t ENDI_tickEnding(entity, isInitialized)
 	state->frame = 0;
 	state->phase = 0;
 	state->entity = entity;
+#ifdef DW1_NATIVE
+	ENDI_downloadClut(ENDI_CLUT_BUFFER);
+	ENDI_setClutStp(ENDI_CLUT_BUFFER);
+#else
 	ENDI_downloadClut((uintptr_t)ENDI_CLUT_BUFFER);
 	ENDI_setClutStp((uintptr_t)ENDI_CLUT_BUFFER);
+#endif
 	ENDI_setModelSemiTrans(ENTITY_TABLE[0], 0x28);
 	PLAYER_SHADOW_ENABLED = 0;
 	addObject(0x812, instanceId, ENDI_updateEnding, ENDI_renderEndingObject);

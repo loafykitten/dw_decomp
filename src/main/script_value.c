@@ -33,11 +33,22 @@ static void *script_value_functions[] = {
 // clang-format off
 SPEAKERS_TEXT
 
+#ifdef DW1_NATIVE
+/* SCRIPT_STAT_LIVES (22) is one past the PS1 table: enforceStatsLimits read the halfword after
+ * it, the low half of MULTIPLE_OF_10's first word (1), so a script setting lives caps them at 1
+ * [obs: the debug Tokomon's SET_STAT lives 3 leaves 1 on the emulator, Phase 9]. */
+int16_t STATS_LIMIT_ARRAY[23] = {
+	0x03e7, 0x03e7, 0x03e7, 0x03e7, 0x270f, 0x270f, 0x270f, 0x270f,
+	0x0064, 0x0064, 0x03e7, 0x03e7, 0x03e7, 0x03e7, 0x270f, 0x270f,
+	0x270f, 0x03e7, 0x03e7, 0x03e7, 0x0063, 0x000a, 0x0001,
+};
+#else
 int16_t STATS_LIMIT_ARRAY[22] = {
 	0x03e7, 0x03e7, 0x03e7, 0x03e7, 0x270f, 0x270f, 0x270f, 0x270f,
 	0x0064, 0x0064, 0x03e7, 0x03e7, 0x03e7, 0x03e7, 0x270f, 0x270f,
 	0x270f, 0x03e7, 0x03e7, 0x03e7, 0x0063, 0x000a,
 };
+#endif
 
 Pow10Table MULTIPLE_OF_10 = {
 	{

@@ -5198,7 +5198,12 @@ void VS_initializeEFESubOpcodeTable(void)
 	int32_t i;
 
 	for (i = 0; (uint32_t)i < 0x61; i++) {
+#ifdef DW1_NATIVE
+		/* The entries are 16 bytes natively (a 64-bit handler pointer), not the PS1's 8. */
+		if ((uint32_t)VS_EFE_SUB_OPCODES[i].opcode >= 0x61) {
+#else
 		if ((uint32_t)((int32_t (*)[2])VS_EFE_SUB_OPCODES)[i][0] >= 0x61) {
+#endif
 			exit(1);
 		}
 		VS_EFE_SUB_OPCODE_HANDLERS[VS_EFE_SUB_OPCODES[i].opcode] = VS_EFE_SUB_OPCODES[i].handler;

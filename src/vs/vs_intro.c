@@ -392,6 +392,12 @@ void VS__runIntro(stage)
 		VS_tickFrame();
 	}
 
+#ifdef DW1_NATIVE
+	/* The PS1 tested `pad & ~prev` here before prev was ever set (whatever its register held).
+	 * 0 is STD_runIntro's value for the same loop, but NOT verified against the PS1: needs an
+	 * emulator check (only matters if the confirm button is already held on the first frame). */
+	prev = 0;
+#endif
 	while (ENTITY_TABLE[1]->anim.animFlag & 1) {
 		pad = PadRead(1);
 		VS_tickFrame();

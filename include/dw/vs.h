@@ -143,11 +143,21 @@ extern GsCOORDINATE2Raw VS_ARENA_COORDS[];
 extern GsDOBJ2 VS_ARENA_OBJECTS[];
 extern int16_t VS_D_80071A0C[];
 extern Entity *VS_D_80071A18[];
+#ifdef DW1_NATIVE
+/* The camera-intro curves are 22 entries each, which the PS1 laid out as two adjacent arrays
+ * (A30 then A40, AE0 then AF0) and indexed across; natively one array holds each. */
+extern int32_t VS_D_80071A30[22];
+#define VS_D_80071A40 (VS_D_80071A30 + 4)
+extern int32_t VS_D_80071A88[22];
+extern int32_t VS_D_80071AE0[22];
+#define VS_D_80071AF0 (VS_D_80071AE0 + 4)
+#else
 extern int32_t VS_D_80071A30[4];
 extern int32_t VS_D_80071A40[];
 extern int32_t VS_D_80071A88[22];
 extern int32_t VS_D_80071AE0[4];
 extern int32_t VS_D_80071AF0[];
+#endif
 extern uint8_t VS_BATTLE_START_TEXT_PIECES[155][20];
 extern PositionDataRaw VS_VERSUS_MODEL_OBJECTS[4];
 extern int16_t VS_RESULT_ROTATION_X[];

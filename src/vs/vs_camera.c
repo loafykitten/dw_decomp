@@ -674,7 +674,12 @@ void VS_tickCameraIntro(void)
 	rot = MAIN_D_80134A8C;
 	rot.vy = VS_D_80071A0C[1];
 	VS_D_80071A0C[2] = processSomeArenaArrays(0x16, p[0], VS_D_800706C8, VS_D_80071A30, VS_D_80071A88);
+#ifdef DW1_NATIVE
+	/* p[6] is the 32-bit slot at A0C + 0xC, which is VS_D_80071A18[0]. */
+	VS_setViewpointFromBone(VS_D_80071A18[0], &off, &rot, VS_D_80071A0C[2]);
+#else
 	VS_setViewpointFromBone(*(Entity **)&p[6], &off, &rot, VS_D_80071A0C[2]);
+#endif
 	GS_VIEWPOINT.vry = (-DIGIMON_DATA[VS_D_80071A18[0]->type].height * 2) / 3;
 	GS_VIEWPOINT.vpy = -processSomeArenaArrays(0x16, p[0], VS_D_800706C8, VS_D_80071AE0, VS_D_80071A88);
 	p[0]++;

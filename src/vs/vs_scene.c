@@ -59,7 +59,11 @@ void VS_renderVersusText(void);
 void VS_initializeCamera(void);
 void VS_initializeLighting(int32_t mode);
 void VS_loadTIMToVRAM(char *path);
+#ifdef DW1_NATIVE
+int32_t VS_getFirstSpecialMove(int32_t index, int32_t nativeFallback);
+#else
 int32_t VS_getFirstSpecialMove(int32_t index);
+#endif
 void VS_playVersusIntroSequence(void);
 void VS_tickPlaytime(void);
 void VS_tickVersusIntro(void);
@@ -1241,7 +1245,11 @@ void VS_loadFighterEntities(uint8_t slot)
 	stats->base.moves[0] = fighter1->moves[0];
 	stats->base.moves[1] = fighter1->moves[1];
 	stats->base.moves[2] = fighter1->moves[2];
+	#ifdef DW1_NATIVE
+	stats->base.moves[3] = VS_getFirstSpecialMove(fighter1->digimonId, fighter1->moves[2]);
+#else
 	stats->base.moves[3] = VS_getFirstSpecialMove(fighter1->digimonId);
+#endif
 
 	stats = &NPC_ENTITIES[0].digimonEntity.stats;
 	stats->current.chargeMode = 0;
@@ -1257,7 +1265,11 @@ void VS_loadFighterEntities(uint8_t slot)
 	stats->base.moves[0] = fighter2->moves[0];
 	stats->base.moves[1] = fighter2->moves[1];
 	stats->base.moves[2] = fighter2->moves[2];
+	#ifdef DW1_NATIVE
+	stats->base.moves[3] = VS_getFirstSpecialMove(fighter2->digimonId, fighter2->moves[2]);
+#else
 	stats->base.moves[3] = VS_getFirstSpecialMove(fighter2->digimonId);
+#endif
 
 	ENTITY_TABLE[1]->isOnMap = 1;
 	ENTITY_TABLE[1]->isOnScreen = 1;
@@ -1542,7 +1554,13 @@ void VS_initializeLighting(int32_t mode)
 	GsSetLightMode(0);
 }
 
+#ifdef DW1_NATIVE
+/* No special move returns the caller's leftover v0 on the PS1: the fighter's third move
+ * (docs/phase5-returns-audit.md). */
+int32_t VS_getFirstSpecialMove(int32_t index, int32_t nativeFallback)
+#else
 int32_t VS_getFirstSpecialMove(int32_t index)
+#endif
 {
 	int32_t i;
 
@@ -1553,6 +1571,9 @@ int32_t VS_getFirstSpecialMove(int32_t index)
 			}
 		}
 	}
+#ifdef DW1_NATIVE
+	return nativeFallback;
+#endif
 }
 
 void VS_playVersusIntroSequence(void)
