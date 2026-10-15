@@ -248,6 +248,14 @@ int32_t handleBattleStart(id)
 			if (j != 3) {
 				continue;
 			}
+#ifdef DW1_NATIVE
+			/* An empty slot (Machinedramon's battle has one enemy): the PS1 read isOnScreen
+			 * from RAM 0x41, 0 [obs: Redux, in battle], so it stored 0 at RAM 0x40, already 0,
+			 * and isInvisible(NULL) skipped the slot. */
+			if (ENTITY_TABLE[i] == NULL) {
+				continue;
+			}
+#endif
 			if (ENTITY_TABLE[i]->isOnScreen == 0) {
 				ENTITY_TABLE[i]->isOnMap = 0;
 			}

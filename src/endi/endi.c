@@ -336,7 +336,15 @@ static void ENDI_releaseParticles(int32_t index)
 
 	ENDI_DATA.base.vx = baseMatrix.t[1];
 	ENDI_DATA.base.vy = baseMatrix.t[2];
+#ifdef DW1_NATIVE
+	/* t[3] is past the matrix: the PS1 read the stack word after it, boneMatrix's first word at
+	 * sp+0x40, not yet written here: a word left by the sound call playSound(8, 1) made just
+	 * before. It was 0 [obs: Redux, the ending replay, VBlank 20184: the word and base.vz after
+	 * the call both 0; with this, base and all 80 particles after the call equal Redux's]. */
+	ENDI_DATA.base.vz = 0;
+#else
 	ENDI_DATA.base.vz = baseMatrix.t[3];
+#endif
 
 	for (i = 0; i < NUM_ENDI_PARTICLES; ++i) {
 		p = &ENDI_PARTICLES[i];

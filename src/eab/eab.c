@@ -213,7 +213,12 @@ void EAB_initializeRings(void)
 
 #ifdef DW1_NATIVE
 	/* The table has 3 entries; the PS1 loop ran on over the 15 8-byte slots after it
-	 * (EAB_D_800617E8 and the start of EAB_D_80061800), natively other globals. */
+	 * (EAB_D_800617E8 and the start of EAB_D_80061800), natively other globals. Nothing
+	 * depended on those writes [obs: Redux, Machinedramon's spawn in the ending replay]:
+	 * EAB_startBuildup runs before EAB_tick's first call, nothing touched the 15 halfwords
+	 * in between (EFE_FLASH_DATA was NULL), and that call rewrote every one of them
+	 * (EabState's frame and location; initializeFlashData and the nine EFECreateFlash calls,
+	 * mode 0x20, every field of flash entries 0-2). */
 	for (i = 0; i < 3; i++) {
 #else
 	for (i = 0; i < 18; i++) {
