@@ -447,6 +447,11 @@ void handlePause(void)
 		PAUSE_BOX_VISIBLE++;
 	}
 	while (PAUSE_STATE != 0) {
+#ifdef DW1_NATIVE
+		/* PS1 pad interrupts keep running here. The native host needs a field
+		 * to pump input/audio without ticking the paused game. */
+		VSync(0);
+#endif
 		PAUSE_INPUT = PadRead(1);
 		if ((PAUSE_INPUT & 0x800) && !(PAUSE_INPUT_PREVIOUS & 0x800)) {
 			PAUSE_STATE = (PAUSE_STATE + 1) & 1;

@@ -1233,6 +1233,10 @@ void VS__tickBattle(void)
 void VS__handlePause(void)
 {
 	while (PAUSE_STATE != 0 && PAUSE_BOX_VISIBLE >= 2) {
+#ifdef DW1_NATIVE
+		/* Service the host while waiting for the pausing player's next Start. */
+		VSync(0);
+#endif
 		if (VS__PAUSING_PLAYER == VS__isButtonsPressed(0x800)) {
 			PAUSE_STATE = (PAUSE_STATE + 1) & 1;
 			VS__PAUSING_PLAYER = 0;
