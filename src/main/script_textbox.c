@@ -662,7 +662,14 @@ int32_t drawString2(uint8_t *str, int16_t x, int16_t y, int32_t flag)
 	int16_t pos;
 	int16_t rem;
 #if VERSION_IS(US)
+#ifdef DW1_NATIVE
+	/* Before the first glyph there is no previous advance. Keep variable-width
+	 * leading padding neutral and fixed-width padding one cell. Once a glyph
+	 * is drawn, retain the original previous-glyph spacing used by numeric fields. */
+	uint16_t adv = DRAW_STRING2_IS_FIXED_WIDTH ? 0xc : 0;
+#else
 	uint16_t adv;
+#endif
 #endif
 	uint16_t glyph;
 
