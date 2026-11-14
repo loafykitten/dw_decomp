@@ -21,8 +21,10 @@ void setImpassableSquare(int32_t x, int32_t y, int32_t r);
 
 #ifdef DW1_NATIVE
 #define DW1_COLLISION_IDX(i) dw1_collision_index(i)
+#define DW1_COLLISION_BYTE(i) dw1_collision_byte(i)
 #else
 #define DW1_COLLISION_IDX(i) (i)
+#define DW1_COLLISION_BYTE(i) MAP_COLLISION_DATA[(i)]
 #endif
 
 static inline int32_t copyValue(int32_t value)
@@ -52,12 +54,12 @@ int32_t getTileTrigger(VECTOR *pos)
 	if (pos->vz > 0) {
 		tz--;
 	}
-	if ((MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] != 0) &&
-	    (MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] != 0x80) &&
-	    (MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] != 0xFF80)) {
-		return (int8_t)MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)];
+	if ((DW1_COLLISION_BYTE(tx + tz * 100) != 0) &&
+	    (DW1_COLLISION_BYTE(tx + tz * 100) != 0x80) &&
+	    (DW1_COLLISION_BYTE(tx + tz * 100) != 0xFF80)) {
+		return (int8_t)DW1_COLLISION_BYTE(tx + tz * 100);
 	}
-	if (MAP_COLLISION_DATA[DW1_COLLISION_IDX(tx + tz * 100)] == 0) {
+	if (DW1_COLLISION_BYTE(tx + tz * 100) == 0) {
 		return 0;
 	} else {
 		return -1;
